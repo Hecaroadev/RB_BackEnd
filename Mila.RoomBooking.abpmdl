@@ -1,0 +1,101 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.BasicTheme": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "9.1.1",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "Mila.RoomBooking.Application": {
+      "path": "src/Mila.RoomBooking.Application/Mila.RoomBooking.Application.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.Application.Tests": {
+      "path": "test/Mila.RoomBooking.Application.Tests/Mila.RoomBooking.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "Mila.RoomBooking.Domain.Shared": {
+      "path": "src/Mila.RoomBooking.Domain.Shared/Mila.RoomBooking.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.Application.Contracts": {
+      "path": "src/Mila.RoomBooking.Application.Contracts/Mila.RoomBooking.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.HttpApi": {
+      "path": "src/Mila.RoomBooking.HttpApi/Mila.RoomBooking.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.HttpApi.Client": {
+      "path": "src/Mila.RoomBooking.HttpApi.Client/Mila.RoomBooking.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.EntityFrameworkCore.Tests": {
+      "path": "test/Mila.RoomBooking.EntityFrameworkCore.Tests/Mila.RoomBooking.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "Mila.RoomBooking.EntityFrameworkCore": {
+      "path": "src/Mila.RoomBooking.EntityFrameworkCore/Mila.RoomBooking.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.TestBase": {
+      "path": "test/Mila.RoomBooking.TestBase/Mila.RoomBooking.TestBase.abppkg",
+      "folder": "test"
+    },
+    "Mila.RoomBooking.Domain.Tests": {
+      "path": "test/Mila.RoomBooking.Domain.Tests/Mila.RoomBooking.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "Mila.RoomBooking.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/Mila.RoomBooking.HttpApi.Client.ConsoleTestApp/Mila.RoomBooking.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "Mila.RoomBooking.DbMigrator": {
+      "path": "src/Mila.RoomBooking.DbMigrator/Mila.RoomBooking.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.HttpApi.Host": {
+      "path": "src/Mila.RoomBooking.HttpApi.Host/Mila.RoomBooking.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "Mila.RoomBooking.Domain": {
+      "path": "src/Mila.RoomBooking.Domain/Mila.RoomBooking.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
