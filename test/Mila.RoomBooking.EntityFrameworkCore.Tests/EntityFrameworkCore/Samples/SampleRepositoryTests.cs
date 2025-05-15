@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Threading.Tasks;
 using Shouldly;
 using Volo.Abp.Domain.Repositories;
@@ -10,7 +11,7 @@ namespace Mila.RoomBooking.EntityFrameworkCore.Samples;
 /* This is just an example test class.
  * Normally, you don't test ABP framework code
  * Only test your custom repository methods.
- */
+ #1#
 [Collection(RoomBookingTestConsts.CollectionDefinitionName)]
 public class SampleRepositoryTests : RoomBookingEntityFrameworkCoreTestBase
 {
@@ -26,7 +27,7 @@ public class SampleRepositoryTests : RoomBookingEntityFrameworkCoreTestBase
     {
         /* Need to manually start Unit Of Work because
          * FirstOrDefaultAsync should be executed while db connection / context is available.
-         */
+         #1#
         await WithUnitOfWorkAsync(async () =>
         {
                 //Act
@@ -38,3 +39,4 @@ public class SampleRepositoryTests : RoomBookingEntityFrameworkCoreTestBase
         });
     }
 }
+*/

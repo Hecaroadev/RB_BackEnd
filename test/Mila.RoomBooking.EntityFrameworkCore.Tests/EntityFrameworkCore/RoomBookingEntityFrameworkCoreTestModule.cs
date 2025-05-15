@@ -14,7 +14,6 @@ using Volo.Abp.Uow;
 namespace Mila.RoomBooking.EntityFrameworkCore;
 
 [DependsOn(
-    typeof(RoomBookingApplicationTestModule),
     typeof(RoomBookingEntityFrameworkCoreModule),
     typeof(AbpEntityFrameworkCoreSqliteModule)
 )]
