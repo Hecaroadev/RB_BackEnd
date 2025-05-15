@@ -9,8 +9,8 @@ using Volo.Abp.Testing;
 
 namespace Mila.RoomBooking;
 
-public abstract class RoomBookingTestBase<TStartupModule> : AbpIntegratedTest<TStartupModule>
-    where TStartupModule : IAbpModule
+public abstract class RoomBookingTestBase :AbpIntegratedTest<RoomBookingTestBaseModule>
+
 {
     protected override void SetAbpApplicationCreationOptions(AbpApplicationCreationOptions options)
     {

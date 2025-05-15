@@ -16,6 +16,12 @@
   <ItemGroup>
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="9.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Volo.Abp.Uow" Version="9.2.0-rc.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="EntityFrameworkCore\BookingRequests\" />
+    <Folder Include="EntityFrameworkCore\Domains\" />
   </ItemGroup>
 
 </Project>
