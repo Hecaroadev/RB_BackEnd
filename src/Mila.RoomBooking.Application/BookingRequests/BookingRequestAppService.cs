@@ -42,11 +42,14 @@ namespace UniversityBooking.BookingRequests
 
         public async Task<PagedResultDto<BookingRequestDto>> GetPendingRequestsAsync(PagedAndSortedResultRequestDto input)
         {
+          // TODO permissions
+            /*
             // Only admin users should access this method
             if (!await AuthorizationService.IsGrantedAsync("UniversityBooking.BookingRequest.Manage"))
             {
                 throw new UnauthorizedAccessException("You don't have permission to view booking requests.");
             }
+            */
 
             var query = await _repository.GetQueryableAsync();
 
@@ -55,7 +58,54 @@ namespace UniversityBooking.BookingRequests
                 .Include(br => br.Room)
                 .Include(br => br.TimeSlot)
                 .Include(br => br.Day)
-                .Include(br => br.Semester)
+                .Include(br => br.RequestedByUser);
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Apply paging and sorting
+            query = query
+                .Skip(input.SkipCount)
+                .Take(input.MaxResultCount);
+
+            if (!string.IsNullOrWhiteSpace(input.Sorting))
+            {
+                // Implement sorting based on input.Sorting
+                query = query.OrderBy(br => br.RequestDate);
+            }
+            else
+            {
+                // Default sorting
+                query = query.OrderBy(br => br.RequestDate);
+            }
+
+            // Get the booking requests
+            var bookingRequests = await query.ToListAsync();
+
+            // Convert to DTOs
+            var bookingRequestDtos = ObjectMapper.Map<List<BookingRequest>, List<BookingRequestDto>>(bookingRequests);
+
+            return new PagedResultDto<BookingRequestDto>(totalCount, bookingRequestDtos);
+        }
+
+        public async Task<PagedResultDto<BookingRequestDto>> GetApprovedRequestsAsync(PagedAndSortedResultRequestDto input)
+        {
+          // TODO permissions
+            /*
+            // Only admin users should access this method
+            if (!await AuthorizationService.IsGrantedAsync("UniversityBooking.BookingRequest.Manage"))
+            {
+                throw new UnauthorizedAccessException("You don't have permission to view booking requests.");
+            }
+            */
+
+            var query = await _repository.GetQueryableAsync();
+
+            query = query
+                .Where(br => br.Status == BookingRequestStatus.Approved)
+                .Include(br => br.Room)
+                .Include(br => br.TimeSlot)
+                .Include(br => br.Day)
                 .Include(br => br.RequestedByUser);
 
             // Get total count
@@ -108,16 +158,31 @@ namespace UniversityBooking.BookingRequests
                 if (input == null)
                     throw new UserFriendlyException("Invalid booking request data.");
 
-                if (input.RoomId == Guid.Empty)
+                // Different validation based on room category
+                if (input.Category != RoomCategory.Lab && (input.RoomId == null || input.RoomId == Guid.Empty))
                     throw new UserFriendlyException("Please select a valid room.");
 
                 if (input.TimeSlotId == Guid.Empty)
                     throw new UserFriendlyException("Please select a valid time slot.");
+                    
+                // Validate required fields for all categories
+                if (string.IsNullOrWhiteSpace(input.InstructorName))
+                    throw new UserFriendlyException("Instructor name is required.");
+                    
+                if (string.IsNullOrWhiteSpace(input.Subject))
+                    throw new UserFriendlyException("Subject is required.");
 
-                // Validate RequestedDate is not in the past
-                if (input.RequestedDate.HasValue && input.RequestedDate.Value.Date < DateTime.Today)
+                // Validate category-specific requirements
+                if (input.Category == RoomCategory.Lab)
                 {
-                    throw new UserFriendlyException("Booking date cannot be in the past.");
+                    if (input.NumberOfStudents <= 0)
+                        throw new UserFriendlyException("Number of students is required for lab bookings.");
+                }
+                
+                // Validate time range
+                if (input.StartTime >= input.EndTime)
+                {
+                    throw new UserFriendlyException("End time must be after start time.");
                 }
 
                 // Ensure user is authenticated
@@ -128,30 +193,29 @@ namespace UniversityBooking.BookingRequests
 
                 var currentUser = await _userRepository.GetAsync(_currentUser.Id.Value);
 
-                // Check if the room is available before creating the request
-                var isAvailable = await _roomBookingManager.IsRoomAvailableAsync(
+                // Handle booking creation based on category
+                BookingRequest bookingRequest;
+                
+                // Use the enhanced booking creation for all requests
+                bookingRequest = await _roomBookingManager.CreateEnhancedBookingRequestAsync(
                     input.RoomId,
-                    input.TimeSlotId,
+                    input.TimeSlotId ?? Guid.Empty,
                     input.DayId,
-                    input.SemesterId);
-
-                if (!isAvailable)
-                {
-                    throw new UserFriendlyException(
-                        "The room is not available for the selected time slot. " +
-                        "Please choose a different time slot or room.");
-                }
-
-                var bookingRequest = await _roomBookingManager.CreateBookingRequestAsync(
-                    input.RoomId,
-                    input.TimeSlotId,
-                    input.DayId,
-                    input.SemesterId,
                     _currentUser.Id.Value,
                     _currentUser.UserName,
                     input.Purpose,
                     currentUser,
-                    input.RequestedDate
+                    input.BookingDate,
+                    input.Category,
+                    input.InstructorName,
+                    input.Subject,
+                    input.NumberOfStudents,
+                    input.StartTime,
+                    input.EndTime,
+                    input.IsRecurring,
+                    input.RecurringWeeks,
+                    input.RequiredTools,
+                    DateTime.Now // Default to current time for RequestedDate
                 );
 
                 return ObjectMapper.Map<BookingRequest, BookingRequestDto>(bookingRequest);
@@ -168,8 +232,16 @@ namespace UniversityBooking.BookingRequests
                 {
                     // Convert domain exception to user-friendly exception
                     throw new UserFriendlyException(
-                        "The room is not available for the selected time slot. " +
-                        "Please choose a different time slot or room.",
+                        "No room is available that meets your requirements. " +
+                        "Please try a different time or adjust your requirements.",
+                        details: e.Message);
+                }
+                else if (e is ArgumentNullException)
+                {
+                    // Handle null argument exceptions
+                    throw new UserFriendlyException(
+                        "Missing required information. " +
+                        "Please fill in all required fields.",
                         details: e.Message);
                 }
                 else
@@ -185,8 +257,39 @@ namespace UniversityBooking.BookingRequests
                 }
             }
         }
+        
+        /// <summary>
+        /// Check if a room category is available for the specified time range
+        /// </summary>
+        public async Task<bool> IsCategoryAvailableAsync(
+            RoomCategory category,
+            Guid dayId,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int requiredCapacity = 0,
+            SoftwareTool requiredTools = SoftwareTool.None)
+        {
+            try
+            {
+                return await _roomBookingManager.IsCategoryAvailableAsync(
+                    category,
+                    dayId,
+                    bookingDate,
+                    startTime,
+                    endTime,
+                    requiredCapacity,
+                    requiredTools);
+            }
+            catch (Exception e)
+            {
+                Logger.LogException(e);
+                throw new UserFriendlyException(
+                    "An error occurred while checking room availability.",
+                    details: e.Message);
+            }
+        }
 
-        [Authorize("UniversityBooking.BookingRequest.Manage")]
         public async Task<BookingRequestDto> ProcessAsync(ProcessBookingRequestDto input)
         {
             if (input.IsApproved)
@@ -214,7 +317,7 @@ namespace UniversityBooking.BookingRequests
             return ObjectMapper.Map<BookingRequest, BookingRequestDto>(bookingRequest);
         }
 
-        public async Task<List<BookingRequestDto>> GetMyRequestsAsync(Guid? semesterId = null)
+        public async Task<List<BookingRequestDto>> GetMyRequestsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
             var query = await _repository.GetQueryableAsync();
 
@@ -222,12 +325,17 @@ namespace UniversityBooking.BookingRequests
                 .Where(br => br.RequestedById == _currentUser.Id)
                 .Include(br => br.Room)
                 .Include(br => br.TimeSlot)
-                .Include(br => br.Day)
-                .Include(br => br.Semester);
+                .Include(br => br.Day);
 
-            if (semesterId.HasValue)
+            // Filter by date range if provided
+            if (startDate.HasValue)
             {
-                query = query.Where(br => br.SemesterId == semesterId.Value);
+                query = query.Where(br => br.BookingDate.Date >= startDate.Value.Date);
+            }
+            
+            if (endDate.HasValue)
+            {
+                query = query.Where(br => br.BookingDate.Date <= endDate.Value.Date);
             }
 
             // Get the booking requests

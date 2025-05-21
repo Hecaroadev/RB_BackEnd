@@ -42,11 +42,12 @@ namespace UniversityBooking.Bookings
 
         public async Task<PagedResultDto<BookingDto>> GetListAsync(PagedAndSortedResultRequestDto input)
         {
+          // TODO permssions
             // Only admin users should access this method
-            if (!await AuthorizationService.IsGrantedAsync("UniversityBooking.Booking.Manage"))
+            /*if (!await AuthorizationService.IsGrantedAsync("UniversityBooking.Booking.Manage"))
             {
                 throw new UnauthorizedAccessException("You don't have permission to view all bookings.");
-            }
+            }*/
 
             var query = await _repository.GetQueryableAsync();
 

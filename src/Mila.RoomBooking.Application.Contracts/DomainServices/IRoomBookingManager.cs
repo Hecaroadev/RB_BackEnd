@@ -12,19 +12,80 @@ namespace UniversityBooking.Rooms
     {
         Task<bool> IsRoomAvailableAsync(
             Guid roomId,
-            Guid timeSlotId,
             Guid dayId,
-            Guid semesterId);
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime);
+            
+        /// <summary>
+        /// Find an available room matching category and requirements for the given date and time
+        /// </summary>
+        Task<Room> FindAvailableRoomAsync(
+            RoomCategory category,
+            Guid dayId,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int requiredCapacity,
+            SoftwareTool requiredTools = SoftwareTool.None);
+            
+        /// <summary>
+        /// Check if any room of the specified category is available
+        /// </summary>
+        Task<bool> IsCategoryAvailableAsync(
+            RoomCategory category,
+            Guid dayId,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int requiredCapacity = 0,
+            SoftwareTool requiredTools = SoftwareTool.None);
+            
+        /// <summary>
+        /// Get available time slots for a specific room, day, and date
+        /// </summary>
+        Task<List<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(
+            Guid roomId,
+            Guid dayId,
+            DateTime bookingDate);
 
+        /// <summary>
+        /// Basic booking request creation with time range
+        /// </summary>
         Task<BookingRequest> CreateBookingRequestAsync(
             Guid roomId,
             Guid timeSlotId,
             Guid dayId,
-            Guid semesterId,
             Guid requestedById,
             string requestedBy,
             string purpose,
             IdentityUser identityUser,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            DateTime? requestedDate = null);
+            
+        /// <summary>
+        /// Enhanced booking request creation with additional fields
+        /// </summary>
+        Task<BookingRequest> CreateEnhancedBookingRequestAsync(
+            Guid? roomId,
+            Guid timeSlotId,
+            Guid dayId,
+            Guid requestedById,
+            string requestedBy,
+            string purpose,
+            IdentityUser identityUser,
+            DateTime bookingDate,
+            RoomCategory category,
+            string instructorName,
+            string subject,
+            int numberOfStudents,
+            TimeSpan? startTime,
+            TimeSpan? endTime,
+            bool isRecurring,
+            int recurringWeeks,
+            SoftwareTool requiredTools,
             DateTime? requestedDate = null);
 
         Task<Booking> ApproveBookingRequestAsync(

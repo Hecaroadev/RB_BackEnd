@@ -10,6 +10,7 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 using Volo.Abp.Uow;
 using Microsoft.EntityFrameworkCore;
+using UniversityBooking.Days;
 using Volo.Abp;
 using Volo.Abp.Identity;
 using Volo.Abp.Users;
@@ -22,24 +23,29 @@ namespace UniversityBooking.Rooms
         private readonly IRepository<BookingRequest, Guid> _bookingRequestRepository;
         private readonly IRepository<Booking, Guid> _bookingRepository;
         private readonly IRepository<Semester, Guid> _semesterRepository;
-        private  readonly ICurrentUser _currentUser;
+        private readonly IRepository<Day, Guid> _dayRepository;
+        private readonly ICurrentUser _currentUser;
+
         public RoomBookingManager(
             IRepository<Room, Guid> roomRepository,
             IRepository<BookingRequest, Guid> bookingRequestRepository,
             IRepository<Booking, Guid> bookingRepository,
-            IRepository<Semester, Guid> semesterRepository)
+            IRepository<Semester, Guid> semesterRepository,
+            IRepository<Day, Guid> dayRepository)
         {
             _roomRepository = roomRepository;
             _bookingRequestRepository = bookingRequestRepository;
             _bookingRepository = bookingRepository;
             _semesterRepository = semesterRepository;
+            _dayRepository = dayRepository;
         }
 
         public async Task<bool> IsRoomAvailableAsync(
             Guid roomId,
-            Guid timeSlotId,
             Guid dayId,
-            Guid semesterId)
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime)
         {
             // Check if room exists
             var room = await _roomRepository.GetAsync(roomId);
@@ -48,28 +54,59 @@ namespace UniversityBooking.Rooms
                 return false;
             }
 
-            // Check if there's an existing active booking for the same time slot
-            var existingBooking = await _bookingRepository.FirstOrDefaultAsync(b =>
-                b.RoomId == roomId &&
-                b.TimeSlotId == timeSlotId &&
-                b.DayId == dayId &&
-                b.SemesterId == semesterId &&
-                b.Status == BookingStatus.Active);
-
-            if (existingBooking != null)
+            // Validate time range
+            if (startTime >= endTime)
             {
-                return false;
+                throw new ArgumentException("End time must be after start time.");
             }
 
-            // Check if there's a pending booking request for the same time slot
-            var pendingRequest = await _bookingRequestRepository.FirstOrDefaultAsync(br =>
-                br.RoomId == roomId &&
-                br.TimeSlotId == timeSlotId &&
-                br.DayId == dayId &&
-                br.SemesterId == semesterId &&
-                br.Status == BookingRequestStatus.Pending);
+            // Check day of week matches booking date
+            var day = await _dayRepository.GetAsync(dayId);
+            if ((int)bookingDate.DayOfWeek != (int)day.DayOfWeek)
+            {
+                throw new ArgumentException($"The day ID does not match the day of week for the booking date. Expected {day.DayOfWeek}, got {bookingDate.DayOfWeek}.");
+            }
 
-            return pendingRequest == null;
+            // Get all active bookings for this room on this date
+            var bookingsQuery = await _bookingRepository.GetQueryableAsync();
+            var existingBookings = await bookingsQuery
+                .Where(b => b.RoomId == roomId &&
+                           b.DayId == dayId &&
+                           b.BookingDate != null && 
+                           b.BookingDate.Value.Date == bookingDate.Date &&
+                           b.Status == BookingStatus.Active)
+                .ToListAsync();
+
+            // Check if any existing booking overlaps with the requested time range
+            foreach (var booking in existingBookings)
+            {
+                // If we have a booking with a time range that overlaps with our requested time range
+                if (booking.StartTime < endTime && booking.EndTime > startTime)
+                {
+                    return false;
+                }
+            }
+
+            // Check pending requests for the same time range
+            var pendingRequestsQuery = await _bookingRequestRepository.GetQueryableAsync();
+            var pendingRequests = await pendingRequestsQuery
+                .Where(br => br.RoomId == roomId &&
+                            br.DayId == dayId &&
+                            br.BookingDate.Date == bookingDate.Date &&
+                            br.Status == BookingRequestStatus.Pending)
+                .ToListAsync();
+
+            // Check if any pending request overlaps with the requested time range
+            foreach (var request in pendingRequests)
+            {
+                // If we have a pending request with a time range that overlaps with our requested time range
+                if (request.StartTime < endTime && request.EndTime > startTime)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         [UnitOfWork]
@@ -77,18 +114,27 @@ namespace UniversityBooking.Rooms
             Guid roomId,
             Guid timeSlotId,
             Guid dayId,
-            Guid semesterId,
             Guid requestedById,
             string requestedBy,
             string purpose,
             IdentityUser requestedByUser,
-            DateTime? requestedDate = null)
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            DateTime? requestedDate = null
+            )
         {
             // Validate availability
-            var isAvailable = await IsRoomAvailableAsync(roomId, timeSlotId, dayId, semesterId);
+            var isAvailable = await IsRoomAvailableAsync(
+                roomId, 
+                dayId, 
+                bookingDate, 
+                startTime, 
+                endTime);
+                
             if (!isAvailable)
             {
-                throw new RoomNotAvailableException("The room is not available for the selected time slot.");
+                throw new RoomNotAvailableException("The room is not available for the selected time range.");
             }
 
             // Create booking request
@@ -97,12 +143,13 @@ namespace UniversityBooking.Rooms
               roomId,
               timeSlotId,
               dayId,
-              semesterId,
               requestedById,
               requestedBy,
               purpose,
               requestedByUser,
-              requestedDate
+              bookingDate,
+              startTime,
+              endTime
             );
             await _bookingRequestRepository.InsertAsync(bookingRequest);
 
@@ -128,15 +175,19 @@ namespace UniversityBooking.Rooms
             }
 
             // Check if the room is still available
-            var isAvailable = await IsRoomAvailableAsync(
+            bool isAvailable;
+
+            // Check availability using the time range
+            isAvailable = await IsRoomAvailableAsync(
                 bookingRequest.RoomId,
-                bookingRequest.TimeSlotId,
                 bookingRequest.DayId,
-                bookingRequest.SemesterId);
+                bookingRequest.BookingDate,
+                bookingRequest.StartTime,
+                bookingRequest.EndTime);
 
             if (!isAvailable)
             {
-                throw new RoomNotAvailableException("The room is no longer available for the requested time slot.");
+                throw new RoomNotAvailableException("The room is no longer available for the requested time.");
             }
 
             // Approve the request
@@ -146,6 +197,8 @@ namespace UniversityBooking.Rooms
 
             // Create a booking from the approved request
             var booking = Booking.CreateFromRequest(bookingRequest, GuidGenerator.Create());
+
+            booking.BookingDate = bookingRequest.BookingDate;
 
             await _bookingRepository.InsertAsync(booking);
 
@@ -185,35 +238,26 @@ namespace UniversityBooking.Rooms
 
             query = query.Where(b => b.RoomId == roomId && b.Status == BookingStatus.Active);
 
-            if (semesterId.HasValue)
+            // Direct date filtering, without using semesters
+            if (startDate.HasValue)
             {
-                query = query.Where(b => b.SemesterId == semesterId.Value);
+                query = query.Where(b => b.BookingDate != null && b.BookingDate.Value.Date >= startDate.Value.Date);
             }
 
-            // If dates are provided, filter by semester dates
-            if (startDate.HasValue || endDate.HasValue)
+            if (endDate.HasValue)
             {
-                var semesterQuery = await _semesterRepository.GetQueryableAsync();
-
-                if (startDate.HasValue)
-                {
-                    var relevantSemesters = semesterQuery.Where(s => s.EndDate >= startDate.Value).Select(s => s.Id).ToList();
-                    query = query.Where(b => relevantSemesters.Contains(b.SemesterId));
-                }
-
-                if (endDate.HasValue)
-                {
-                    var relevantSemesters = semesterQuery.Where(s => s.StartDate <= endDate.Value).Select(s => s.Id).ToList();
-                    query = query.Where(b => relevantSemesters.Contains(b.SemesterId));
-                }
+                query = query.Where(b => b.BookingDate != null && b.BookingDate.Value.Date <= endDate.Value.Date);
             }
+
+            // Removed semester filtering - now using date ranges only
 
             return await query
                 .Include(b => b.Room)
                 .Include(b => b.TimeSlot)
                 .Include(b => b.Day)
-                .Include(b => b.Semester)
                 .Include(b => b.ReservedByUser)
+                .OrderBy(b => b.BookingDate)
+                .ThenBy(b => b.StartTime)
                 .ToListAsync();
         }
 
@@ -226,10 +270,278 @@ namespace UniversityBooking.Rooms
                 .Include(br => br.Room)
                 .Include(br => br.TimeSlot)
                 .Include(br => br.Day)
-                .Include(br => br.Semester)
                 .Include(br => br.RequestedByUser)
                 .OrderBy(br => br.RequestDate)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get available time slots for a specific room, day, and date
+        /// </summary>
+        public async Task<List<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(
+            Guid roomId,
+            Guid dayId,
+            DateTime bookingDate)
+        {
+            // Check if room exists
+            var room = await _roomRepository.GetAsync(roomId);
+            if (room == null || !room.IsActive)
+            {
+                throw new ArgumentException("Room not found or not active.");
+            }
+
+            // Check day of week matches booking date
+            var day = await _dayRepository.GetAsync(dayId);
+            if ((int)bookingDate.DayOfWeek != (int)day.DayOfWeek)
+            {
+                throw new ArgumentException($"The day ID does not match the day of week for the booking date. Expected {day.DayOfWeek}, got {bookingDate.DayOfWeek}.");
+            }
+
+            // Define the default operating hours (e.g., 9 AM to 10 PM)
+            TimeSpan dayStart = new TimeSpan(9, 0, 0); // 9:00 AM
+            TimeSpan dayEnd = new TimeSpan(22, 0, 0);  // 10:00 PM
+
+            // Get all bookings for this room on this day and date
+            var bookingsQuery = await _bookingRepository.GetQueryableAsync();
+            var existingBookings = await bookingsQuery
+                .Where(b => b.RoomId == roomId &&
+                           b.DayId == dayId &&
+                           b.BookingDate != null &&
+                           b.BookingDate.Value.Date == bookingDate.Date &&
+                           b.Status == BookingStatus.Active)
+                .ToListAsync();
+
+            // Get all pending booking requests for this room on this day and date
+            var pendingRequestsQuery = await _bookingRequestRepository.GetQueryableAsync();
+            var pendingRequests = await pendingRequestsQuery
+                .Where(br => br.RoomId == roomId &&
+                            br.DayId == dayId &&
+                            br.BookingDate.Date == bookingDate.Date &&
+                            br.Status == BookingRequestStatus.Pending)
+                .ToListAsync();
+
+            // Combine booked time slots (both from active bookings and pending requests)
+            var bookedTimeSlots = new List<(TimeSpan Start, TimeSpan End)>();
+
+            foreach (var booking in existingBookings)
+            {
+                if (booking.StartTime != null && booking.EndTime != null)
+                {
+                    bookedTimeSlots.Add((booking.StartTime.Value, booking.EndTime.Value));
+                }
+            }
+
+            foreach (var request in pendingRequests)
+            {
+                bookedTimeSlots.Add((request.StartTime, request.EndTime));
+            }
+
+            // Sort booked time slots by start time
+            bookedTimeSlots = bookedTimeSlots.OrderBy(t => t.Start).ToList();
+
+            // Find available time slots (the gaps between booked slots)
+            var availableSlots = new List<AvailableTimeSlot>();
+            TimeSpan currentStart = dayStart;
+
+            foreach (var bookedSlot in bookedTimeSlots)
+            {
+                // If there's a gap between current start and the booked slot's start
+                if (currentStart < bookedSlot.Start)
+                {
+                    availableSlots.Add(new AvailableTimeSlot(currentStart, bookedSlot.Start));
+                }
+
+                // Move current start to the end of this booked slot
+                if (bookedSlot.End > currentStart)
+                {
+                    currentStart = bookedSlot.End;
+                }
+            }
+
+            // Add the final available slot if there's time left in the day
+            if (currentStart < dayEnd)
+            {
+                availableSlots.Add(new AvailableTimeSlot(currentStart, dayEnd));
+            }
+
+            return availableSlots;
+        }
+
+        /// <summary>
+        /// Find an available room matching category and requirements for the given date and time
+        /// </summary>
+        public async Task<Room> FindAvailableRoomAsync(
+            RoomCategory category,
+            Guid dayId,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int requiredCapacity,
+            SoftwareTool requiredTools = SoftwareTool.None)
+        {
+            // Get all rooms that match the category and have sufficient capacity
+            var roomsQuery = await _roomRepository.GetQueryableAsync();
+            roomsQuery = roomsQuery
+                .Where(r => r.IsActive)
+                .Where(r => r.Category == category)
+                .Where(r => r.Capacity >= requiredCapacity);
+
+            // If software tools are required, filter rooms with those tools
+            if (requiredTools != SoftwareTool.None)
+            {
+                // Filter rooms that have all the required tools
+                // This uses a bitwise check to ensure all required flags are present
+                roomsQuery = roomsQuery.Where(r => (r.AvailableTools & requiredTools) == requiredTools);
+            }
+
+            // Get rooms
+            var potentialRooms = await roomsQuery.ToListAsync();
+            var availableRooms = new List<Room>();
+
+            // Check each room for availability during the specified time range
+            foreach (var room in potentialRooms)
+            {
+                bool isAvailable = await IsRoomAvailableAsync(
+                    room.Id,
+                    dayId,
+                    bookingDate,
+                    startTime,
+                    endTime);
+
+                if (isAvailable)
+                {
+                    availableRooms.Add(room);
+                }
+            }
+
+            // Return the first available room, prioritizing rooms with the closest capacity match
+            return availableRooms
+                .OrderBy(r => r.Capacity - requiredCapacity) // Prioritize closest capacity match
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Check if any room of the specified category is available
+        /// </summary>
+        public async Task<bool> IsCategoryAvailableAsync(
+            RoomCategory category,
+            Guid dayId,
+            DateTime bookingDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int requiredCapacity = 0,
+            SoftwareTool requiredTools = SoftwareTool.None)
+        {
+            var availableRoom = await FindAvailableRoomAsync(
+                category,
+                dayId,
+                bookingDate,
+                startTime,
+                endTime,
+                requiredCapacity,
+                requiredTools);
+
+            return availableRoom != null;
+        }
+
+        /// <summary>
+        /// Enhanced booking request creation with additional fields
+        /// </summary>
+        [UnitOfWork]
+        public async Task<BookingRequest> CreateEnhancedBookingRequestAsync(
+            Guid? roomId,
+            Guid timeSlotId,
+            Guid dayId,
+            Guid requestedById,
+            string requestedBy,
+            string purpose,
+            IdentityUser requestedByUser,
+            DateTime bookingDate,
+            RoomCategory category,
+            string instructorName,
+            string subject,
+            int numberOfStudents,
+            TimeSpan? startTime,
+            TimeSpan? endTime,
+            bool isRecurring,
+            int recurringWeeks,
+            SoftwareTool requiredTools,
+            DateTime? requestedDate = null)
+        {
+            // Validate time range
+            if (startTime == null || endTime == null)
+            {
+                throw new ArgumentException("Both start time and end time must be provided.");
+            }
+                
+            if (startTime.Value >= endTime.Value)
+            {
+                throw new ArgumentException("End time must be after start time.");
+            }
+
+            // For Lab category, find an appropriate room automatically if roomId is not provided
+            if (category == RoomCategory.Lab && roomId == null)
+            {
+                    var availableRoom = await FindAvailableRoomAsync(
+                        category,
+                        dayId,
+                        bookingDate,
+                        startTime.Value,
+                        endTime.Value,
+                        numberOfStudents,
+                        requiredTools);
+
+                    if (availableRoom == null)
+                    {
+                        throw new RoomNotAvailableException("No lab room is available that meets your requirements. Please try a different time or adjust your requirements.");
+                    }
+
+                    roomId = availableRoom.Id;
+                }
+                else if (roomId == null)
+                {
+                    throw new ArgumentNullException(nameof(roomId), "Room ID is required for non-Lab category bookings.");
+                }
+
+                // Check if the room is available at the requested time
+                var isAvailable = await IsRoomAvailableAsync(
+                    roomId.Value,
+                    dayId,
+                    bookingDate,
+                    startTime.Value,
+                    endTime.Value);
+
+                if (!isAvailable)
+                {
+                    throw new RoomNotAvailableException("The room is not available for the selected time range.");
+                }
+
+            // Create booking request
+            var bookingRequest = new BookingRequest(
+                GuidGenerator.Create(),
+                roomId.Value,
+                timeSlotId,
+                dayId,
+                requestedById,
+                requestedBy,
+                purpose,
+                requestedByUser,
+                bookingDate,
+                startTime.Value,
+                endTime.Value,
+                // New parameters
+                category,
+                instructorName,
+                subject,
+                numberOfStudents,
+                isRecurring,
+                recurringWeeks,
+                requiredTools
+            );
+
+            await _bookingRequestRepository.InsertAsync(bookingRequest);
+
+            return bookingRequest;
         }
     }
 

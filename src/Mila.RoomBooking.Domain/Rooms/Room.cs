@@ -17,6 +17,16 @@ namespace UniversityBooking.Rooms
         public RoomType Type { get; private set; }
         public bool IsActive { get; set; }
         
+        /// <summary>
+        /// The category of room for booking process
+        /// </summary>
+        public RoomCategory Category { get; private set; }
+        
+        /// <summary>
+        /// Software tools available in this room (if applicable)
+        /// </summary>
+        public SoftwareTool AvailableTools { get; private set; }
+        
         public virtual ICollection<Booking> Bookings { get; private set; }
         public virtual ICollection<BookingRequest> BookingRequests { get; private set; }
 
@@ -31,7 +41,9 @@ namespace UniversityBooking.Rooms
             string floor,
             int capacity,
             RoomType type,
-            string description = null
+            string description = null,
+            RoomCategory category = RoomCategory.Regular,
+            SoftwareTool availableTools = SoftwareTool.None
         ) : base(id)
         {
             Number = number;
@@ -40,6 +52,8 @@ namespace UniversityBooking.Rooms
             Capacity = capacity;
             Type = type;
             Description = description;
+            Category = category;
+            AvailableTools = availableTools;
             IsActive = true;
             
             Bookings = new List<Booking>();
@@ -52,7 +66,9 @@ namespace UniversityBooking.Rooms
             string floor,
             int capacity,
             RoomType type,
-            string description = null)
+            string description = null,
+            RoomCategory category = RoomCategory.Regular,
+            SoftwareTool availableTools = SoftwareTool.None)
         {
             Number = number;
             Building = building;
@@ -60,6 +76,8 @@ namespace UniversityBooking.Rooms
             Capacity = capacity;
             Type = type;
             Description = description;
+            Category = category;
+            AvailableTools = availableTools;
         }
     }
 

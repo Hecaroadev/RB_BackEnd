@@ -39,6 +39,7 @@ public class RoomBookingDbContext :
     public DbSet<Semester> Semesters { get; set; }
     public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<UniversityBooking.Rooms.AvailabilityAnnouncement> AvailabilityAnnouncements { get; set; }
 
     #region Entities from the modules
 
@@ -98,6 +99,7 @@ public class RoomBookingDbContext :
         builder.ApplyConfiguration(new SemesterConfiguration());
         builder.ApplyConfiguration(new BookingRequestConfiguration());
         builder.ApplyConfiguration(new BookingConfiguration());
+        builder.ApplyConfiguration(new AvailabilityAnnouncementConfiguration());
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>

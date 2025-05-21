@@ -67,7 +67,6 @@ namespace UniversityBooking.Rooms
                 .Where(b => 
                     b.TimeSlotId == input.TimeSlotId && 
                     b.DayId == input.DayId && 
-                    b.SemesterId == input.SemesterId && 
                     b.Status == BookingStatus.Active)
                 .Select(b => b.RoomId);
             
@@ -78,7 +77,6 @@ namespace UniversityBooking.Rooms
                 .Where(br => 
                     br.TimeSlotId == input.TimeSlotId && 
                     br.DayId == input.DayId && 
-                    br.SemesterId == input.SemesterId && 
                     br.Status == BookingRequests.BookingRequestStatus.Pending)
                 .Select(br => br.RoomId);
             

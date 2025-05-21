@@ -1,1 +1,1 @@
-/* Your Global Scripts */
+/* Global Scripts */

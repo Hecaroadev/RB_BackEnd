@@ -20,8 +20,9 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.Property(x => x.Purpose).IsRequired().HasMaxLength(500);
             builder.Property(x => x.IsRecurring).IsRequired();
             builder.Property(x => x.Status).IsRequired();
-            builder.Property(x => x.BookingDate).IsRequired(false);
-
+            builder.Property(x => x.BookingDate)
+              .HasColumnType("datetime2") // Use datetime2 for better precision and range
+              .IsRequired(true); // Allow
             // Index for faster lookups
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.ReservedById);
@@ -60,7 +61,7 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
                 .WithMany()
                 .HasForeignKey(b => b.BookingRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             builder
                 .HasOne(b => b.ReservedByUser)
                 .WithMany()

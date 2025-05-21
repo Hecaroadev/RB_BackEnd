@@ -48,10 +48,7 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
                 opt => opt.MapFrom(src => src.TimeSlot))
             .ForMember(
                 dest => dest.Day,
-                opt => opt.MapFrom(src => src.Day))
-            .ForMember(
-                dest => dest.Semester,
-                opt => opt.MapFrom(src => src.Semester));
+                opt => opt.MapFrom(src => src.Day));
             
         // Booking
         CreateMap<Booking, BookingDto>()
@@ -63,10 +60,7 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
                 opt => opt.MapFrom(src => src.TimeSlot))
             .ForMember(
                 dest => dest.Day,
-                opt => opt.MapFrom(src => src.Day))
-            .ForMember(
-                dest => dest.Semester,
-                opt => opt.MapFrom(src => src.Semester));
+                opt => opt.MapFrom(src => src.Day));
                 
         // BookingBoard mappings
         CreateMap<WeeklyCalendar, WeeklyCalendarDto>();
@@ -74,5 +68,9 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
             .ForMember(
                 dest => dest.FormattedDate,
                 opt => opt.MapFrom(src => src.Date.ToString("MMM dd")));
+                
+        // AvailabilityAnnouncement mapping
+        CreateMap<AvailabilityAnnouncement, AvailabilityAnnouncementDto>();
+        CreateMap<CreateUpdateAvailabilityAnnouncementDto, AvailabilityAnnouncement>();
     }
 }
