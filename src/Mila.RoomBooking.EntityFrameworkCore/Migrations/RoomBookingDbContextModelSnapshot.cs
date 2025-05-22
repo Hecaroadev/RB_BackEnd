@@ -142,7 +142,10 @@ namespace Mila.RoomBooking.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<Guid>("RoomId")
+                    b.Property<Guid?>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RoomId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<TimeSpan>("StartTime")
@@ -168,6 +171,8 @@ namespace Mila.RoomBooking.Migrations
                     b.HasIndex("ProcessedById");
 
                     b.HasIndex("RequestedById");
+
+                    b.HasIndex("RoomId1");
 
                     b.HasIndex("Status");
 
@@ -268,7 +273,7 @@ namespace Mila.RoomBooking.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TimeSlotId")
+                    b.Property<Guid?>("TimeSlotId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -290,8 +295,6 @@ namespace Mila.RoomBooking.Migrations
                     b.HasIndex("TimeSlotId");
 
                     b.HasIndex("RoomId", "TimeSlotId", "BookingDate", "Status");
-
-                    b.HasIndex("RoomId", "TimeSlotId", "DayId", "SemesterId", "Status");
 
                     b.ToTable("Bookings", (string)null);
                 });
@@ -2495,10 +2498,13 @@ namespace Mila.RoomBooking.Migrations
                         .IsRequired();
 
                     b.HasOne("UniversityBooking.Rooms.Room", "Room")
-                        .WithMany("BookingRequests")
+                        .WithMany()
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("UniversityBooking.Rooms.Room", null)
+                        .WithMany("BookingRequests")
+                        .HasForeignKey("RoomId1");
 
                     b.HasOne("UniversityBooking.TimeSlots.TimeSlot", "TimeSlot")
                         .WithMany()
@@ -2548,14 +2554,13 @@ namespace Mila.RoomBooking.Migrations
                     b.HasOne("UniversityBooking.Semesters.Semester", "Semester")
                         .WithMany()
                         .HasForeignKey("SemesterId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UniversityBooking.TimeSlots.TimeSlot", "TimeSlot")
                         .WithMany()
                         .HasForeignKey("TimeSlotId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("BookingRequest");
 

@@ -12,9 +12,8 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.ToTable("Bookings");
 
             builder.Property(x => x.RoomId).IsRequired();
-            builder.Property(x => x.TimeSlotId).IsRequired();
+            builder.Property(x => x.TimeSlotId).IsRequired(false);
             builder.Property(x => x.DayId).IsRequired();
-            builder.Property(x => x.SemesterId).IsRequired();
             builder.Property(x => x.ReservedBy).IsRequired().HasMaxLength(256);
             builder.Property(x => x.ReservedById).IsRequired();
             builder.Property(x => x.Purpose).IsRequired().HasMaxLength(500);
@@ -28,7 +27,6 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.HasIndex(x => x.ReservedById);
             builder.HasIndex(x => x.BookingRequestId);
             builder.HasIndex(x => x.BookingDate);
-            builder.HasIndex(x => new { x.RoomId, x.TimeSlotId, x.DayId, x.SemesterId, x.Status });
             builder.HasIndex(x => new { x.RoomId, x.TimeSlotId, x.BookingDate, x.Status });
 
             // Relationships
@@ -50,11 +48,7 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
                 .HasForeignKey(b => b.DayId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(b => b.Semester)
-                .WithMany()
-                .HasForeignKey(b => b.SemesterId)
-                .OnDelete(DeleteBehavior.Restrict);
+
 
             builder
                 .HasOne(b => b.BookingRequest)

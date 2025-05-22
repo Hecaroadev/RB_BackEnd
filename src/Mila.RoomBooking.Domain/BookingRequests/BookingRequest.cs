@@ -12,7 +12,7 @@ namespace UniversityBooking.BookingRequests
     public class BookingRequest : FullAuditedAggregateRoot<Guid>
     {
         // Basic booking information
-        public Guid RoomId { get; private set; }
+        public Guid? RoomId { get; private set; } // Can be Guid.Empty if not assigned yet
         public Guid? TimeSlotId { get; private set; } // Optional now, since we use custom time ranges
         public Guid DayId { get; private set; } // Day of week
         public string RequestedBy { get; private set; } // Username or email of requestor
@@ -52,7 +52,7 @@ namespace UniversityBooking.BookingRequests
 
         public BookingRequest(
             Guid id,
-            Guid roomId,
+            Guid? roomId,
             Guid? timeSlotId,
             Guid dayId,
             Guid requestedById,
@@ -72,7 +72,7 @@ namespace UniversityBooking.BookingRequests
             SoftwareTool requiredTools = SoftwareTool.None
         ) : base(id)
         {
-            RoomId = roomId;
+          RoomId = roomId ?? null;// Use Empty GUID if no room is assigned yet
             TimeSlotId = timeSlotId;
             DayId = dayId;
             RequestedById = requestedById;
@@ -122,6 +122,18 @@ namespace UniversityBooking.BookingRequests
             else
             {
                 throw new InvalidOperationException("Cannot cancel a request that is not pending.");
+            }
+        }
+
+        public void UpdateRoom(Guid roomId)
+        {
+            if (Status == BookingRequestStatus.Pending)
+            {
+                RoomId = roomId;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot update room for a request that is not pending.");
             }
         }
     }

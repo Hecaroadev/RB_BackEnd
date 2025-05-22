@@ -30,12 +30,14 @@ namespace UniversityBooking.Bookings
         {
             var booking = await _repository.GetAsync(id);
 
+            /*
             // Check if the user is the creator of the booking or an admin
             if (booking.ReservedById != _currentUser.Id &&
                 !await AuthorizationService.IsGrantedAsync("UniversityBooking.Booking.Manage"))
             {
                 throw new UnauthorizedAccessException("You don't have permission to view this booking.");
             }
+            */
 
             return ObjectMapper.Map<Booking, BookingDto>(booking);
         }
@@ -52,11 +54,9 @@ namespace UniversityBooking.Bookings
             var query = await _repository.GetQueryableAsync();
 
             query = query
-                .Include(b => b.Room)
-                .Include(b => b.TimeSlot)
-                .Include(b => b.Day)
-                .Include(b => b.Semester);
-
+              .Include(b => b.Room)
+              .Include(b => b.TimeSlot)
+              .Include(b => b.Day);
             // Get total count
             var totalCount = await query.CountAsync();
 
@@ -95,10 +95,38 @@ namespace UniversityBooking.Bookings
                 .Include(b => b.Day)
                 .Include(b => b.Semester);
 
-            if (semesterId.HasValue)
+
+            // Get the bookings
+            var bookings = await query.ToListAsync();
+
+            // Convert to DTOs
+            var bookingDtos = ObjectMapper.Map<List<Booking>, List<BookingDto>>(bookings);
+
+            return bookingDtos;
+        }
+
+        public async Task<List<BookingDto>> GetByRoomAndDateAsync(Guid? roomId, DateTime? date)
+        {
+            var query = await _repository.GetQueryableAsync();
+
+            // Apply room filter if provided
+            if (roomId.HasValue && roomId.Value != Guid.Empty)
             {
-                query = query.Where(b => b.SemesterId == semesterId.Value);
+                query = query.Where(b => b.RoomId == roomId.Value);
             }
+
+            // Apply date filter if provided
+            if (date.HasValue)
+            {
+                query = query.Where(b => b.BookingDate == null || b.BookingDate.Value.Date == date.Value.Date);
+            }
+
+            // Only get active bookings
+            query = query.Where(b => b.Status == BookingStatus.Active)
+                .Include(b => b.Room)
+                .Include(b => b.TimeSlot)
+                .Include(b => b.Day)
+                .Include(b => b.Semester);
 
             // Get the bookings
             var bookings = await query.ToListAsync();
@@ -120,10 +148,6 @@ namespace UniversityBooking.Bookings
                 .Include(b => b.Day)
                 .Include(b => b.Semester);
 
-            if (semesterId.HasValue)
-            {
-                query = query.Where(b => b.SemesterId == semesterId.Value);
-            }
 
             // Get the bookings
             var bookings = await query.ToListAsync();

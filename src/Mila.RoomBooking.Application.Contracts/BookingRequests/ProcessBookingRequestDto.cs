@@ -14,5 +14,8 @@ namespace UniversityBooking.BookingRequests.Dtos
 
         [StringLength(500)]
         public string? RejectionReason { get; set; }
+        
+        // Room ID for admin assignment during approval
+        public Guid? RoomId { get; set; }
     }
 }

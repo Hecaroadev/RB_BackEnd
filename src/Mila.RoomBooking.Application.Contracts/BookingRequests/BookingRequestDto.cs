@@ -31,7 +31,7 @@ namespace UniversityBooking.BookingRequests.Dtos
         public DateTime? ProcessedDate { get; set; }
         public string ProcessedBy { get; set; }
         public Guid? ProcessedById { get; set; }
-        
+
         // New fields for enhanced booking process
         public RoomCategory Category { get; set; }
         public string CategoryString => Category.ToString();
@@ -51,13 +51,13 @@ namespace UniversityBooking.BookingRequests.Dtos
         public string FormattedRequestDate => RequestDate.ToString("g");
         public string FormattedProcessedDate => ProcessedDate?.ToString("g");
         public string FormattedBookingDate => BookingDate.ToString("yyyy-MM-dd");
-        
+
         // Format times as strings
-        public string FormattedStartTime => StartTime.ToString(@"hh\:mm tt");
-        public string FormattedEndTime => EndTime.ToString(@"hh\:mm tt");
+        public string FormattedStartTime => StartTime.ToString(@"hh\:mm");
+        public string FormattedEndTime => EndTime.ToString(@"hh\:mm");
         public string FormattedTimeRange => $"{FormattedStartTime} - {FormattedEndTime}";
         public string FormattedDayAndDate => $"{Day?.Name}, {FormattedBookingDate}";
-        
+
         // Helper property to get the required tools as a list of strings
         public List<string> RequiredToolsList
         {
@@ -65,7 +65,7 @@ namespace UniversityBooking.BookingRequests.Dtos
             {
                 if (RequiredTools == SoftwareTool.None)
                     return new List<string>();
-                
+
                 return Enum.GetValues(typeof(SoftwareTool))
                     .Cast<SoftwareTool>()
                     .Where(t => t != SoftwareTool.None && RequiredTools.HasFlag(t))

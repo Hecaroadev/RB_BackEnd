@@ -41,18 +41,25 @@ namespace UniversityBooking.Rooms
         }
 
         public async Task<bool> IsRoomAvailableAsync(
-            Guid roomId,
+            Guid? roomId,
             Guid dayId,
             DateTime bookingDate,
             TimeSpan startTime,
             TimeSpan endTime)
         {
-            // Check if room exists
-            var room = await _roomRepository.GetAsync(roomId);
+            // If roomId is null or empty, we're checking if any room is available
+            if (!roomId.HasValue || roomId.Value == Guid.Empty)
+            {
+                return true; // Room will be assigned by admin during approval
+            }
+
+            // Check if room exists and is active
+            var room = await _roomRepository.GetAsync(roomId.Value);
             if (room == null || !room.IsActive)
             {
                 return false;
             }
+
 
             // Validate time range
             if (startTime >= endTime)
@@ -72,7 +79,7 @@ namespace UniversityBooking.Rooms
             var existingBookings = await bookingsQuery
                 .Where(b => b.RoomId == roomId &&
                            b.DayId == dayId &&
-                           b.BookingDate != null && 
+                           b.BookingDate != null &&
                            b.BookingDate.Value.Date == bookingDate.Date &&
                            b.Status == BookingStatus.Active)
                 .ToListAsync();
@@ -126,12 +133,12 @@ namespace UniversityBooking.Rooms
         {
             // Validate availability
             var isAvailable = await IsRoomAvailableAsync(
-                roomId, 
-                dayId, 
-                bookingDate, 
-                startTime, 
+                roomId,
+                dayId,
+                bookingDate,
+                startTime,
                 endTime);
-                
+
             if (!isAvailable)
             {
                 throw new RoomNotAvailableException("The room is not available for the selected time range.");
@@ -174,20 +181,25 @@ namespace UniversityBooking.Rooms
                 throw new InvalidOperationException("Only pending booking requests can be approved.");
             }
 
-            // Check if the room is still available
-            bool isAvailable;
-
-            // Check availability using the time range
-            isAvailable = await IsRoomAvailableAsync(
-                bookingRequest.RoomId,
-                bookingRequest.DayId,
-                bookingRequest.BookingDate,
-                bookingRequest.StartTime,
-                bookingRequest.EndTime);
-
-            if (!isAvailable)
+            // Only check room availability if a room has been assigned
+            if (bookingRequest.RoomId != Guid.Empty)
             {
-                throw new RoomNotAvailableException("The room is no longer available for the requested time.");
+                // Check if the room is still available
+                bool isAvailable = await IsRoomAvailableAsync(
+                    bookingRequest.RoomId,
+                    bookingRequest.DayId,
+                    bookingRequest.BookingDate,
+                    bookingRequest.StartTime,
+                    bookingRequest.EndTime);
+
+                if (!isAvailable)
+                {
+                    throw new RoomNotAvailableException("The room is no longer available for the requested time.");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("A room must be assigned before a booking request can be approved.");
             }
 
             // Approve the request
@@ -473,36 +485,15 @@ namespace UniversityBooking.Rooms
             {
                 throw new ArgumentException("Both start time and end time must be provided.");
             }
-                
+
             if (startTime.Value >= endTime.Value)
             {
                 throw new ArgumentException("End time must be after start time.");
             }
 
-            // For Lab category, find an appropriate room automatically if roomId is not provided
-            if (category == RoomCategory.Lab && roomId == null)
+            // If roomId is provided, check availability
+            if (roomId.HasValue)
             {
-                    var availableRoom = await FindAvailableRoomAsync(
-                        category,
-                        dayId,
-                        bookingDate,
-                        startTime.Value,
-                        endTime.Value,
-                        numberOfStudents,
-                        requiredTools);
-
-                    if (availableRoom == null)
-                    {
-                        throw new RoomNotAvailableException("No lab room is available that meets your requirements. Please try a different time or adjust your requirements.");
-                    }
-
-                    roomId = availableRoom.Id;
-                }
-                else if (roomId == null)
-                {
-                    throw new ArgumentNullException(nameof(roomId), "Room ID is required for non-Lab category bookings.");
-                }
-
                 // Check if the room is available at the requested time
                 var isAvailable = await IsRoomAvailableAsync(
                     roomId.Value,
@@ -513,13 +504,15 @@ namespace UniversityBooking.Rooms
 
                 if (!isAvailable)
                 {
-                    throw new RoomNotAvailableException("The room is not available for the selected time range.");
+                    throw new RoomNotAvailableException("The selected room is not available for the requested time range.");
                 }
+            }
+            // Room will be assigned by admin during approval if not provided
 
             // Create booking request
             var bookingRequest = new BookingRequest(
                 GuidGenerator.Create(),
-                roomId.Value,
+                roomId, // Pass the nullable roomId directly
                 timeSlotId,
                 dayId,
                 requestedById,

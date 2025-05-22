@@ -158,17 +158,15 @@ namespace UniversityBooking.BookingRequests
                 if (input == null)
                     throw new UserFriendlyException("Invalid booking request data.");
 
-                // Different validation based on room category
-                if (input.Category != RoomCategory.Lab && (input.RoomId == null || input.RoomId == Guid.Empty))
-                    throw new UserFriendlyException("Please select a valid room.");
+                // Room selection is now optional for all categories - will be assigned by admin
 
                 if (input.TimeSlotId == Guid.Empty)
                     throw new UserFriendlyException("Please select a valid time slot.");
-                    
+
                 // Validate required fields for all categories
                 if (string.IsNullOrWhiteSpace(input.InstructorName))
                     throw new UserFriendlyException("Instructor name is required.");
-                    
+
                 if (string.IsNullOrWhiteSpace(input.Subject))
                     throw new UserFriendlyException("Subject is required.");
 
@@ -178,7 +176,7 @@ namespace UniversityBooking.BookingRequests
                     if (input.NumberOfStudents <= 0)
                         throw new UserFriendlyException("Number of students is required for lab bookings.");
                 }
-                
+
                 // Validate time range
                 if (input.StartTime >= input.EndTime)
                 {
@@ -195,11 +193,11 @@ namespace UniversityBooking.BookingRequests
 
                 // Handle booking creation based on category
                 BookingRequest bookingRequest;
-                
+
                 // Use the enhanced booking creation for all requests
                 bookingRequest = await _roomBookingManager.CreateEnhancedBookingRequestAsync(
                     input.RoomId,
-                    input.TimeSlotId ?? Guid.Empty,
+                    input.TimeSlotId,
                     input.DayId,
                     _currentUser.Id.Value,
                     _currentUser.UserName,
@@ -219,8 +217,7 @@ namespace UniversityBooking.BookingRequests
                 );
 
                 return ObjectMapper.Map<BookingRequest, BookingRequestDto>(bookingRequest);
-            }
-            catch (Exception e)
+            }            catch (Exception e)
             {
                 // Add more context to the error message if it's not already a UserFriendlyException
                 if (e is UserFriendlyException)
@@ -257,7 +254,7 @@ namespace UniversityBooking.BookingRequests
                 }
             }
         }
-        
+
         /// <summary>
         /// Check if a room category is available for the specified time range
         /// </summary>
@@ -292,9 +289,25 @@ namespace UniversityBooking.BookingRequests
 
         public async Task<BookingRequestDto> ProcessAsync(ProcessBookingRequestDto input)
         {
-            if (input.IsApproved)
+            var bookingRequest = await _repository.GetAsync(input.BookingRequestId);
+
+            // If this is an approval with room assignment
+            if (input.IsApproved && input.RoomId.HasValue)
             {
+                // Update the RoomId on the booking request before approval
+                bookingRequest.UpdateRoom(input.RoomId.Value);
+                await _repository.UpdateAsync(bookingRequest);
+
                 // Approve the booking request
+                await _roomBookingManager.ApproveBookingRequestAsync(
+                    input.BookingRequestId,
+                    _currentUser.Id.Value,
+                    _currentUser.UserName
+                );
+            }
+            else if (input.IsApproved)
+            {
+                // Standard approval without room change
                 await _roomBookingManager.ApproveBookingRequestAsync(
                     input.BookingRequestId,
                     _currentUser.Id.Value,
@@ -312,7 +325,8 @@ namespace UniversityBooking.BookingRequests
                 );
             }
 
-            var bookingRequest = await _repository.GetAsync(input.BookingRequestId);
+            // Reload the booking request
+            bookingRequest = await _repository.GetAsync(input.BookingRequestId);
 
             return ObjectMapper.Map<BookingRequest, BookingRequestDto>(bookingRequest);
         }
@@ -332,7 +346,7 @@ namespace UniversityBooking.BookingRequests
             {
                 query = query.Where(br => br.BookingDate.Date >= startDate.Value.Date);
             }
-            
+
             if (endDate.HasValue)
             {
                 query = query.Where(br => br.BookingDate.Date <= endDate.Value.Date);

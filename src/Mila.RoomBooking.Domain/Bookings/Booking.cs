@@ -15,7 +15,6 @@ namespace UniversityBooking.Bookings
         public Guid RoomId { get; private set; }
         public Guid? TimeSlotId { get; private set; }
         public Guid DayId { get; private set; }
-        public Guid? SemesterId { get; private set; }
         public Guid? BookingRequestId { get; private set; }
         public Guid ReservedById { get; private set; }
         public string ReservedBy { get; private set; }
@@ -39,10 +38,9 @@ namespace UniversityBooking.Bookings
 
         public Booking(
             Guid id,
-            Guid roomId,
+            Guid? roomId,
             Guid? timeSlotId,
             Guid dayId,
-            Guid? semesterId,
             Guid reservedById,
             string reservedBy,
             string purpose,
@@ -53,10 +51,9 @@ namespace UniversityBooking.Bookings
             TimeSpan? endTime = null
         ) : base(id)
         {
-            RoomId = roomId;
+            RoomId = roomId ?? Guid.Empty;
             TimeSlotId = timeSlotId;
             DayId = dayId;
-            SemesterId = semesterId;
             BookingRequestId = bookingRequestId;
             ReservedById = reservedById;
             ReservedBy = reservedBy;
@@ -75,7 +72,6 @@ namespace UniversityBooking.Bookings
                 request.RoomId,
                 request.TimeSlotId,
                 request.DayId,
-                null, // Nullable semesterId since we're phasing it out
                 request.RequestedById,
                 request.RequestedBy,
                 request.Purpose,

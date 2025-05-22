@@ -11,12 +11,12 @@ namespace UniversityBooking.Rooms
     public interface IRoomBookingManager
     {
         Task<bool> IsRoomAvailableAsync(
-            Guid roomId,
+            Guid? roomId,
             Guid dayId,
             DateTime bookingDate,
             TimeSpan startTime,
             TimeSpan endTime);
-            
+
         /// <summary>
         /// Find an available room matching category and requirements for the given date and time
         /// </summary>
@@ -28,7 +28,7 @@ namespace UniversityBooking.Rooms
             TimeSpan endTime,
             int requiredCapacity,
             SoftwareTool requiredTools = SoftwareTool.None);
-            
+
         /// <summary>
         /// Check if any room of the specified category is available
         /// </summary>
@@ -40,7 +40,7 @@ namespace UniversityBooking.Rooms
             TimeSpan endTime,
             int requiredCapacity = 0,
             SoftwareTool requiredTools = SoftwareTool.None);
-            
+
         /// <summary>
         /// Get available time slots for a specific room, day, and date
         /// </summary>
@@ -64,7 +64,7 @@ namespace UniversityBooking.Rooms
             TimeSpan startTime,
             TimeSpan endTime,
             DateTime? requestedDate = null);
-            
+
         /// <summary>
         /// Enhanced booking request creation with additional fields
         /// </summary>
