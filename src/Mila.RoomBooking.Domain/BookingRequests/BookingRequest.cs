@@ -2,7 +2,6 @@
 using System;
 using UniversityBooking.Days;
 using UniversityBooking.Rooms;
-using UniversityBooking.Semesters;
 using UniversityBooking.TimeSlots;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Identity;
@@ -14,9 +13,9 @@ namespace UniversityBooking.BookingRequests
         // Basic booking information
         public Guid? RoomId { get; private set; } // Can be Guid.Empty if not assigned yet
         public Guid? TimeSlotId { get; private set; } // Optional now, since we use custom time ranges
-        public Guid DayId { get; private set; } // Day of week
-        public string RequestedBy { get; private set; } // Username or email of requestor
-        public Guid RequestedById { get; private set; } // User ID of requestor
+        public Guid? DayId { get; private set; } // Day of week
+        public string? RequestedBy { get; private set; } // Username or email of requestor
+        public Guid? RequestedById { get; private set; } // User ID of requestor
         public DateTime RequestDate { get; private set; } // When the request was created
         public DateTime BookingDate { get; private set; } // The specific calendar date for the booking
         public TimeSpan StartTime { get; private set; } // Start time of booking

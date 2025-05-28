@@ -3,7 +3,6 @@ using System;
 using System.Threading.Tasks;
 using UniversityBooking.Days;
 using UniversityBooking.Rooms;
-using UniversityBooking.Semesters;
 using UniversityBooking.TimeSlots;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
@@ -17,20 +16,17 @@ namespace UniversityBooking.Data
         private readonly IRepository<Room, Guid> _roomRepository;
         private readonly IRepository<TimeSlot, Guid> _timeSlotRepository;
         private readonly IRepository<Day, Guid> _dayRepository;
-        private readonly IRepository<Semester, Guid> _semesterRepository;
         private readonly IGuidGenerator _guidGenerator;
 
         public UniversityBookingDataSeederContributor(
             IRepository<Room, Guid> roomRepository,
             IRepository<TimeSlot, Guid> timeSlotRepository,
             IRepository<Day, Guid> dayRepository,
-            IRepository<Semester, Guid> semesterRepository,
             IGuidGenerator guidGenerator)
         {
             _roomRepository = roomRepository;
             _timeSlotRepository = timeSlotRepository;
             _dayRepository = dayRepository;
-            _semesterRepository = semesterRepository;
             _guidGenerator = guidGenerator;
         }
 
@@ -82,28 +78,7 @@ namespace UniversityBooking.Data
                     new TimeSlot(_guidGenerator.Create(), "8-9", new TimeSpan(20, 0, 0), new TimeSpan(21, 0, 0)));
             }
 
-            // Seed current semester (based on the image showing 1446 Hijri second semester)
-            if (await _semesterRepository.GetCountAsync() == 0)
-            {
-                // Note: Dates are approximate and should be adjusted based on actual academic calendar
-                await _semesterRepository.InsertAsync(
-                    new Semester(
-                        _guidGenerator.Create(),
-                        "Second Semester 1446H",
-                        new DateTime(2025, 1, 1),
-                        new DateTime(2025, 5, 31)
-                    )
-                );
-                
-                await _semesterRepository.InsertAsync(
-                    new Semester(
-                        _guidGenerator.Create(),
-                        "First Semester 1447H",
-                        new DateTime(2025, 9, 1),
-                        new DateTime(2025, 12, 31)
-                    )
-                );
-            }
+            // Semester data seeding removed
 
             // Seed sample rooms
             if (await _roomRepository.GetCountAsync() == 0)

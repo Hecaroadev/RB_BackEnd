@@ -4,7 +4,6 @@ using UniversityBooking.Bookings;
 using UniversityBooking.Days;
 using UniversityBooking.EntityFrameworkCore.Configurations;
 using UniversityBooking.Rooms;
-using UniversityBooking.Semesters;
 using UniversityBooking.TimeSlots;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -36,7 +35,6 @@ public class RoomBookingDbContext :
     public DbSet<Room> Rooms { get; set; }
     public DbSet<TimeSlot> TimeSlots { get; set; }
     public DbSet<Day> Days { get; set; }
-    public DbSet<Semester> Semesters { get; set; }
     public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<UniversityBooking.Rooms.AvailabilityAnnouncement> AvailabilityAnnouncements { get; set; }
@@ -96,7 +94,6 @@ public class RoomBookingDbContext :
         builder.ApplyConfiguration(new RoomConfiguration());
         builder.ApplyConfiguration(new TimeSlotConfiguration());
         builder.ApplyConfiguration(new DayConfiguration());
-        builder.ApplyConfiguration(new SemesterConfiguration());
         builder.ApplyConfiguration(new BookingRequestConfiguration());
         builder.ApplyConfiguration(new BookingConfiguration());
         builder.ApplyConfiguration(new AvailabilityAnnouncementConfiguration());

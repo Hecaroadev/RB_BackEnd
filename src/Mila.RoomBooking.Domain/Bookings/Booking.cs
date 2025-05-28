@@ -3,7 +3,6 @@ using System;
 using UniversityBooking.BookingRequests;
 using UniversityBooking.Days;
 using UniversityBooking.Rooms;
-using UniversityBooking.Semesters;
 using UniversityBooking.TimeSlots;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Identity;
@@ -28,7 +27,6 @@ namespace UniversityBooking.Bookings
         public virtual Room Room { get; private set; }
         public virtual TimeSlot TimeSlot { get; private set; }
         public virtual Day Day { get; private set; }
-        public virtual Semester Semester { get; private set; }
         public virtual BookingRequest BookingRequest { get; private set; }
         public virtual IdentityUser ReservedByUser { get; private set; }
 
@@ -70,10 +68,10 @@ namespace UniversityBooking.Bookings
             return new Booking(
                 id,
                 request.RoomId,
-                request.TimeSlotId,
-                request.DayId,
-                request.RequestedById,
-                request.RequestedBy,
+                request.TimeSlotId ?? Guid.NewGuid(),
+                request.DayId ?? Guid.NewGuid(),
+                request.RequestedById ?? Guid.NewGuid(),
+                request.RequestedBy ?? "Unknown",
                 request.Purpose,
                 request.Id,
                 request.IsRecurring,

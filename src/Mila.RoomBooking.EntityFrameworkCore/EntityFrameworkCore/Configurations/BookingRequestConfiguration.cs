@@ -15,9 +15,9 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
 
             builder.Property(x => x.RoomId).IsRequired(false);
             builder.Property(x => x.TimeSlotId).IsRequired(false); // Now optional
-            builder.Property(x => x.DayId).IsRequired();
+            builder.Property(x => x.DayId).IsRequired(false);
             builder.Property(x => x.RequestedBy).IsRequired().HasMaxLength(256);
-            builder.Property(x => x.RequestedById).IsRequired();
+            builder.Property(x => x.RequestedById).IsRequired(false);
             builder.Property(x => x.RequestDate).IsRequired();
             builder.Property(x => x.Purpose).IsRequired().HasMaxLength(500);
             builder.Property(x => x.Status).IsRequired();

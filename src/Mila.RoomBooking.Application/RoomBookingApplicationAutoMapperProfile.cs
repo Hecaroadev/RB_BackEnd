@@ -9,8 +9,6 @@ using UniversityBooking.Days;
 using UniversityBooking.Days.Dtos;
 using UniversityBooking.Rooms;
 using UniversityBooking.Rooms.Dtos;
-using UniversityBooking.Semesters;
-using UniversityBooking.Semesters.Dtos;
 using UniversityBooking.TimeSlots;
 using UniversityBooking.TimeSlots.Dtos;
 
@@ -33,10 +31,6 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
             
         // Day
         CreateMap<Day, DayDto>();
-            
-        // Semester
-        CreateMap<Semester, SemesterDto>();
-        CreateMap<CreateUpdateSemesterDto, Semester>();
             
         // BookingRequest
         CreateMap<BookingRequest, BookingRequestDto>()

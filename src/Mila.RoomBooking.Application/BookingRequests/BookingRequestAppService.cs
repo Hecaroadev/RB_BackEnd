@@ -197,8 +197,8 @@ namespace UniversityBooking.BookingRequests
                 // Use the enhanced booking creation for all requests
                 bookingRequest = await _roomBookingManager.CreateEnhancedBookingRequestAsync(
                     input.RoomId,
-                    input.TimeSlotId,
-                    input.DayId,
+                    input.TimeSlotId ?? Guid.NewGuid(), // Use Guid.Empty if TimeSlotId is not provided
+                    input.DayId ?? Guid.NewGuid(), // Use Guid.Empty if DayId is not provided
                     _currentUser.Id.Value,
                     _currentUser.UserName,
                     input.Purpose,

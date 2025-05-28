@@ -11,10 +11,10 @@ namespace UniversityBooking.BookingRequests.Dtos
         public Guid? RoomId { get; set; }
 
         // TimeSlot is now optional since we're using explicit time ranges
-        public Guid TimeSlotId { get; set; }
+        public Guid? TimeSlotId { get; set; }
 
         [Required]
-        public Guid DayId { get; set; }
+        public Guid? DayId { get; set; }
 
         [Required]
         [StringLength(500)]

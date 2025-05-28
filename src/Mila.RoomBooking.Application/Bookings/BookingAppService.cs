@@ -85,15 +85,14 @@ namespace UniversityBooking.Bookings
             return new PagedResultDto<BookingDto>(totalCount, bookingDtos);
         }
 
-        public async Task<List<BookingDto>> GetByRoomAsync(Guid roomId, Guid? semesterId = null)
+        public async Task<List<BookingDto>> GetByRoomAsync(Guid roomId)
         {
             var query = await _repository.GetQueryableAsync();
 
             query = query
                 .Where(b => b.RoomId == roomId && b.Status == BookingStatus.Active)
                 .Include(b => b.TimeSlot)
-                .Include(b => b.Day)
-                .Include(b => b.Semester);
+                .Include(b => b.Day);
 
 
             // Get the bookings
@@ -125,8 +124,7 @@ namespace UniversityBooking.Bookings
             query = query.Where(b => b.Status == BookingStatus.Active)
                 .Include(b => b.Room)
                 .Include(b => b.TimeSlot)
-                .Include(b => b.Day)
-                .Include(b => b.Semester);
+                .Include(b => b.Day);
 
             // Get the bookings
             var bookings = await query.ToListAsync();
@@ -137,7 +135,7 @@ namespace UniversityBooking.Bookings
             return bookingDtos;
         }
 
-        public async Task<List<BookingDto>> GetMyBookingsAsync(Guid? semesterId = null)
+        public async Task<List<BookingDto>> GetMyBookingsAsync()
         {
             var query = await _repository.GetQueryableAsync();
 
@@ -145,8 +143,7 @@ namespace UniversityBooking.Bookings
                 .Where(b => b.ReservedById == _currentUser.Id)
                 .Include(b => b.Room)
                 .Include(b => b.TimeSlot)
-                .Include(b => b.Day)
-                .Include(b => b.Semester);
+                .Include(b => b.Day);
 
 
             // Get the bookings

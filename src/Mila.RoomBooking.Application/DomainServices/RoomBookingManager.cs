@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UniversityBooking.BookingRequests;
 using UniversityBooking.Bookings;
-using UniversityBooking.Semesters;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 using Volo.Abp.Uow;
@@ -22,7 +21,6 @@ namespace UniversityBooking.Rooms
         private readonly IRepository<Room, Guid> _roomRepository;
         private readonly IRepository<BookingRequest, Guid> _bookingRequestRepository;
         private readonly IRepository<Booking, Guid> _bookingRepository;
-        private readonly IRepository<Semester, Guid> _semesterRepository;
         private readonly IRepository<Day, Guid> _dayRepository;
         private readonly ICurrentUser _currentUser;
 
@@ -30,19 +28,17 @@ namespace UniversityBooking.Rooms
             IRepository<Room, Guid> roomRepository,
             IRepository<BookingRequest, Guid> bookingRequestRepository,
             IRepository<Booking, Guid> bookingRepository,
-            IRepository<Semester, Guid> semesterRepository,
             IRepository<Day, Guid> dayRepository)
         {
             _roomRepository = roomRepository;
             _bookingRequestRepository = bookingRequestRepository;
             _bookingRepository = bookingRepository;
-            _semesterRepository = semesterRepository;
             _dayRepository = dayRepository;
         }
 
         public async Task<bool> IsRoomAvailableAsync(
             Guid? roomId,
-            Guid dayId,
+            Guid? dayId,
             DateTime bookingDate,
             TimeSpan startTime,
             TimeSpan endTime)
@@ -68,7 +64,7 @@ namespace UniversityBooking.Rooms
             }
 
             // Check day of week matches booking date
-            var day = await _dayRepository.GetAsync(dayId);
+            var day = await _dayRepository.GetAsync(dayId ?? Guid.NewGuid()); // Use a new GUID if dayId is not provided
             if ((int)bookingDate.DayOfWeek != (int)day.DayOfWeek)
             {
                 throw new ArgumentException($"The day ID does not match the day of week for the booking date. Expected {day.DayOfWeek}, got {bookingDate.DayOfWeek}.");
@@ -119,9 +115,9 @@ namespace UniversityBooking.Rooms
         [UnitOfWork]
         public async Task<BookingRequest> CreateBookingRequestAsync(
             Guid roomId,
-            Guid timeSlotId,
-            Guid dayId,
-            Guid requestedById,
+            Guid? timeSlotId,
+            Guid? dayId,
+            Guid? requestedById,
             string requestedBy,
             string purpose,
             IdentityUser requestedByUser,
@@ -149,8 +145,8 @@ namespace UniversityBooking.Rooms
               GuidGenerator.Create(),
               roomId,
               timeSlotId,
-              dayId,
-              requestedById,
+              dayId ?? Guid.NewGuid(), // Use a new GUID if dayId is not provided
+              requestedById ?? Guid.NewGuid(),
               requestedBy,
               purpose,
               requestedByUser,
@@ -161,6 +157,43 @@ namespace UniversityBooking.Rooms
             await _bookingRequestRepository.InsertAsync(bookingRequest);
 
             return bookingRequest;
+        }
+
+        public Task<bool> IsRoomAvailableAsync(Guid? roomId, Guid dayId, DateTime bookingDate, TimeSpan startTime, TimeSpan endTime)
+        {
+          throw new NotImplementedException();
+        }
+
+        public Task<Room> FindAvailableRoomAsync(RoomCategory category, Guid? dayId, DateTime bookingDate, TimeSpan startTime,
+          TimeSpan endTime, int requiredCapacity, SoftwareTool requiredTools = SoftwareTool.None)
+        {
+          throw new NotImplementedException();
+        }
+
+        public Task<bool> IsCategoryAvailableAsync(RoomCategory category, Guid? dayId, DateTime bookingDate, TimeSpan startTime,
+          TimeSpan endTime, int requiredCapacity = 0, SoftwareTool requiredTools = SoftwareTool.None)
+        {
+          throw new NotImplementedException();
+        }
+
+        public Task<List<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(Guid roomId, Guid? dayId, DateTime bookingDate)
+        {
+          throw new NotImplementedException();
+        }
+
+        public Task<BookingRequest> CreateBookingRequestAsync(Guid roomId, Guid? timeSlotId, Guid? dayId, Guid requestedById, string requestedBy,
+          string purpose, IdentityUser identityUser, DateTime bookingDate, TimeSpan startTime, TimeSpan endTime,
+          DateTime? requestedDate = null)
+        {
+          throw new NotImplementedException();
+        }
+
+        public Task<BookingRequest> CreateEnhancedBookingRequestAsync(Guid? roomId, Guid? timeSlotId, Guid? dayId, Guid? requestedById,
+          string requestedBy, string purpose, IdentityUser identityUser, DateTime bookingDate, RoomCategory category,
+          string instructorName, string subject, int numberOfStudents, TimeSpan? startTime, TimeSpan? endTime, bool isRecurring,
+          int recurringWeeks, SoftwareTool requiredTools, DateTime? requestedDate = null)
+        {
+          throw new NotImplementedException();
         }
 
         [UnitOfWork]
@@ -186,8 +219,8 @@ namespace UniversityBooking.Rooms
             {
                 // Check if the room is still available
                 bool isAvailable = await IsRoomAvailableAsync(
-                    bookingRequest.RoomId,
-                    bookingRequest.DayId,
+                    bookingRequest.RoomId ?? Guid.NewGuid(), // Use the provided roomId or a new GUID if not assigned
+                    bookingRequest.DayId ?? Guid.NewGuid(),
                     bookingRequest.BookingDate,
                     bookingRequest.StartTime,
                     bookingRequest.EndTime);
@@ -242,7 +275,6 @@ namespace UniversityBooking.Rooms
 
         public async Task<List<Booking>> GetRoomBookingsAsync(
             Guid roomId,
-            Guid? semesterId = null,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
@@ -462,8 +494,8 @@ namespace UniversityBooking.Rooms
         [UnitOfWork]
         public async Task<BookingRequest> CreateEnhancedBookingRequestAsync(
             Guid? roomId,
-            Guid timeSlotId,
-            Guid dayId,
+            Guid? timeSlotId,
+            Guid? dayId,
             Guid requestedById,
             string requestedBy,
             string purpose,
@@ -497,7 +529,7 @@ namespace UniversityBooking.Rooms
                 // Check if the room is available at the requested time
                 var isAvailable = await IsRoomAvailableAsync(
                     roomId.Value,
-                    dayId,
+                    dayId ?? Guid.NewGuid(), // Use a new GUID if dayId is not provided
                     bookingDate,
                     startTime.Value,
                     endTime.Value);
@@ -513,8 +545,8 @@ namespace UniversityBooking.Rooms
             var bookingRequest = new BookingRequest(
                 GuidGenerator.Create(),
                 roomId, // Pass the nullable roomId directly
-                timeSlotId,
-                dayId,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
                 requestedById,
                 requestedBy,
                 purpose,

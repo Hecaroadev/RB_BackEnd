@@ -7,7 +7,6 @@ using UniversityBooking.BookingBoard.Dtos;
 using UniversityBooking.Bookings;
 using UniversityBooking.Days;
 using UniversityBooking.Rooms;
-using UniversityBooking.Semesters;
 using UniversityBooking.TimeSlots;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -20,20 +19,17 @@ namespace UniversityBooking.BookingBoard
         private readonly IRepository<Day, Guid> _dayRepository;
         private readonly IRepository<TimeSlot, Guid> _timeSlotRepository;
         private readonly IRepository<Booking, Guid> _bookingRepository;
-        private readonly IRepository<Semester, Guid> _semesterRepository;
 
         public BookingBoardAppService(
             IRepository<Room, Guid> roomRepository,
             IRepository<Day, Guid> dayRepository,
             IRepository<TimeSlot, Guid> timeSlotRepository,
-            IRepository<Booking, Guid> bookingRepository,
-            IRepository<Semester, Guid> semesterRepository)
+            IRepository<Booking, Guid> bookingRepository)
         {
             _roomRepository = roomRepository;
             _dayRepository = dayRepository;
             _timeSlotRepository = timeSlotRepository;
             _bookingRepository = bookingRepository;
-            _semesterRepository = semesterRepository;
         }
 
         public async Task<BookingBoardDto> GetCurrentWeekAsync(Guid? roomId = null)
@@ -43,14 +39,11 @@ namespace UniversityBooking.BookingBoard
 
         public async Task<BookingBoardDto> GetForDateAsync(DateTime date, Guid? roomId = null)
         {
-            // Get the current semester
-            var currentSemester = await GetCurrentSemesterAsync();
-            
             // Get all days
             var days = await _dayRepository.GetListAsync();
             
             // Create weekly calendar
-            var weeklyCalendar = CreateWeeklyCalendar(date, days, currentSemester);
+            var weeklyCalendar = CreateWeeklyCalendar(date, days);
             
             // Get rooms and time slots
             var rooms = await GetRoomsAsync(roomId);
@@ -81,13 +74,6 @@ namespace UniversityBooking.BookingBoard
 
         public async Task<bool> IsRoomAvailableAsync(Guid roomId, Guid timeSlotId, DateTime date)
         {
-            // Check if the date is in semester
-            var currentSemester = await GetCurrentSemesterAsync();
-            if (currentSemester == null || !currentSemester.IsDateInSemester(date))
-            {
-                return false;
-            }
-            
             // Get the day of week
             var dayOfWeek = date.DayOfWeek;
             
@@ -146,43 +132,9 @@ namespace UniversityBooking.BookingBoard
             return bookings;
         }
 
-        private async Task<Semester> GetCurrentSemesterAsync()
+        private WeeklyCalendar CreateWeeklyCalendar(DateTime referenceDate, List<Day> workingDays)
         {
-            var query = await _semesterRepository.GetQueryableAsync();
-            
-            // Try to get the active semester first
-            var activeSemester = await query
-                .Where(s => s.IsActive)
-                .FirstOrDefaultAsync();
-                
-            if (activeSemester != null)
-            {
-                return activeSemester;
-            }
-            
-            // If no active semester, get the semester that contains the current date
-            var today = DateTime.Today;
-            var currentSemester = await query
-                .Where(s => s.StartDate <= today && s.EndDate >= today)
-                .FirstOrDefaultAsync();
-                
-            if (currentSemester != null)
-            {
-                return currentSemester;
-            }
-            
-            // If no current semester, get the nearest future semester
-            var futureSemester = await query
-                .Where(s => s.StartDate > today)
-                .OrderBy(s => s.StartDate)
-                .FirstOrDefaultAsync();
-                
-            return futureSemester;
-        }
-
-        private WeeklyCalendar CreateWeeklyCalendar(DateTime referenceDate, List<Day> workingDays, Semester currentSemester)
-        {
-            return new WeeklyCalendar(referenceDate, workingDays, currentSemester);
+            return new WeeklyCalendar(referenceDate, workingDays);
         }
     }
 }

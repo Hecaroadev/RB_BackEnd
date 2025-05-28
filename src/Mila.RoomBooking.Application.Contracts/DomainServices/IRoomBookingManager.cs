@@ -22,7 +22,7 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<Room> FindAvailableRoomAsync(
             RoomCategory category,
-            Guid dayId,
+            Guid? dayId,
             DateTime bookingDate,
             TimeSpan startTime,
             TimeSpan endTime,
@@ -34,7 +34,7 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<bool> IsCategoryAvailableAsync(
             RoomCategory category,
-            Guid dayId,
+            Guid? dayId,
             DateTime bookingDate,
             TimeSpan startTime,
             TimeSpan endTime,
@@ -46,7 +46,7 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<List<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(
             Guid roomId,
-            Guid dayId,
+            Guid? dayId,
             DateTime bookingDate);
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<BookingRequest> CreateBookingRequestAsync(
             Guid roomId,
-            Guid timeSlotId,
-            Guid dayId,
+            Guid? timeSlotId,
+            Guid? dayId,
             Guid requestedById,
             string requestedBy,
             string purpose,
@@ -70,9 +70,9 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<BookingRequest> CreateEnhancedBookingRequestAsync(
             Guid? roomId,
-            Guid timeSlotId,
-            Guid dayId,
-            Guid requestedById,
+            Guid? timeSlotId,
+            Guid? dayId,
+            Guid? requestedById,
             string requestedBy,
             string purpose,
             IdentityUser identityUser,
@@ -101,7 +101,6 @@ namespace UniversityBooking.Rooms
 
         Task<List<Booking>> GetRoomBookingsAsync(
             Guid roomId,
-            Guid? semesterId = null,
             DateTime? startDate = null,
             DateTime? endDate = null);
 
