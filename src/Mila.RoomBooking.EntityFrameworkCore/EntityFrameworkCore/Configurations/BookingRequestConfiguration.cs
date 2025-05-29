@@ -14,8 +14,6 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.ToTable("BookingRequests");
 
             builder.Property(x => x.RoomId).IsRequired(false);
-            builder.Property(x => x.TimeSlotId).IsRequired(false); // Now optional
-            builder.Property(x => x.DayId).IsRequired(false);
             builder.Property(x => x.RequestedBy).IsRequired().HasMaxLength(256);
             builder.Property(x => x.RequestedById).IsRequired(false);
             builder.Property(x => x.RequestDate).IsRequired();
@@ -40,7 +38,6 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             // Index for faster lookups
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.RequestedById);
-            builder.HasIndex(x => new { x.RoomId, x.TimeSlotId, x.DayId, x.Status });
 
             // Relationships
             builder
@@ -54,17 +51,8 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
               .HasForeignKey(b => b.RoomId)
               .IsRequired(false); // This makes the relationship optional
 
-            builder
-                .HasOne(br => br.TimeSlot)
-                .WithMany()
-                .HasForeignKey(br => br.TimeSlotId)
-                .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(br => br.Day)
-                .WithMany()
-                .HasForeignKey(br => br.DayId)
-                .OnDelete(DeleteBehavior.Restrict);
+
 
             builder
                 .HasOne(br => br.RequestedByUser)

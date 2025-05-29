@@ -54,9 +54,7 @@ namespace UniversityBooking.Bookings
             var query = await _repository.GetQueryableAsync();
 
             query = query
-              .Include(b => b.Room)
-              .Include(b => b.TimeSlot)
-              .Include(b => b.Day);
+              .Include(b => b.Room);
             // Get total count
             var totalCount = await query.CountAsync();
 
@@ -90,10 +88,7 @@ namespace UniversityBooking.Bookings
             var query = await _repository.GetQueryableAsync();
 
             query = query
-                .Where(b => b.RoomId == roomId && b.Status == BookingStatus.Active)
-                .Include(b => b.TimeSlot)
-                .Include(b => b.Day);
-
+              .Where(b => b.RoomId == roomId && b.Status == BookingStatus.Active);
 
             // Get the bookings
             var bookings = await query.ToListAsync();
@@ -122,9 +117,7 @@ namespace UniversityBooking.Bookings
 
             // Only get active bookings
             query = query.Where(b => b.Status == BookingStatus.Active)
-                .Include(b => b.Room)
-                .Include(b => b.TimeSlot)
-                .Include(b => b.Day);
+              .Include(b => b.Room);
 
             // Get the bookings
             var bookings = await query.ToListAsync();
@@ -140,10 +133,8 @@ namespace UniversityBooking.Bookings
             var query = await _repository.GetQueryableAsync();
 
             query = query
-                .Where(b => b.ReservedById == _currentUser.Id)
-                .Include(b => b.Room)
-                .Include(b => b.TimeSlot)
-                .Include(b => b.Day);
+              .Where(b => b.ReservedById == _currentUser.Id)
+              .Include(b => b.Room);
 
 
             // Get the bookings

@@ -33,8 +33,8 @@ public class RoomBookingDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Room> Rooms { get; set; }
-    public DbSet<TimeSlot> TimeSlots { get; set; }
-    public DbSet<Day> Days { get; set; }
+   public DbSet<TimeSlot> TimeSlots { get; set; }
+   public DbSet<Day> Days { get; set; }
     public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<UniversityBooking.Rooms.AvailabilityAnnouncement> AvailabilityAnnouncements { get; set; }
@@ -89,7 +89,7 @@ public class RoomBookingDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureTenantManagement();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
         builder.ApplyConfiguration(new RoomConfiguration());
         builder.ApplyConfiguration(new TimeSlotConfiguration());

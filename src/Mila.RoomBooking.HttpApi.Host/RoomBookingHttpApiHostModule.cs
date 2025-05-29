@@ -33,6 +33,7 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.Bundling;
 using Microsoft.AspNetCore.Hosting;
+using Mila.RoomBooking.Middleware;
 using UniversityBooking.Rooms;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Identity;
@@ -293,5 +294,7 @@ public class RoomBookingHttpApiHostModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
     }
 }

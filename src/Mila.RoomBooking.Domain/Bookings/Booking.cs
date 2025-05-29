@@ -12,8 +12,7 @@ namespace UniversityBooking.Bookings
     public class Booking : FullAuditedAggregateRoot<Guid>
     {
         public Guid RoomId { get; private set; }
-        public Guid? TimeSlotId { get; private set; }
-        public Guid DayId { get; private set; }
+
         public Guid? BookingRequestId { get; private set; }
         public Guid ReservedById { get; private set; }
         public string ReservedBy { get; private set; }
@@ -25,8 +24,6 @@ namespace UniversityBooking.Bookings
         public TimeSpan? EndTime { get; set; } // End time of booking
 
         public virtual Room Room { get; private set; }
-        public virtual TimeSlot TimeSlot { get; private set; }
-        public virtual Day Day { get; private set; }
         public virtual BookingRequest BookingRequest { get; private set; }
         public virtual IdentityUser ReservedByUser { get; private set; }
 
@@ -37,8 +34,6 @@ namespace UniversityBooking.Bookings
         public Booking(
             Guid id,
             Guid? roomId,
-            Guid? timeSlotId,
-            Guid dayId,
             Guid reservedById,
             string reservedBy,
             string purpose,
@@ -50,8 +45,7 @@ namespace UniversityBooking.Bookings
         ) : base(id)
         {
             RoomId = roomId ?? Guid.Empty;
-            TimeSlotId = timeSlotId;
-            DayId = dayId;
+
             BookingRequestId = bookingRequestId;
             ReservedById = reservedById;
             ReservedBy = reservedBy;
@@ -68,8 +62,6 @@ namespace UniversityBooking.Bookings
             return new Booking(
                 id,
                 request.RoomId,
-                request.TimeSlotId ?? Guid.NewGuid(),
-                request.DayId ?? Guid.NewGuid(),
                 request.RequestedById ?? Guid.NewGuid(),
                 request.RequestedBy ?? "Unknown",
                 request.Purpose,
@@ -81,17 +73,6 @@ namespace UniversityBooking.Bookings
             );
         }
 
-        public bool IsForDate(DateTime date)
-        {
-            // If booking has a specific date, check exact match
-            if (BookingDate.HasValue)
-            {
-                return BookingDate.Value.Date == date.Date;
-            }
-
-            // Otherwise check if it's for the same day of week
-            return Day != null && (int)Day.DayOfWeek == (int)date.DayOfWeek;
-        }
 
         public void Cancel(string reason)
         {

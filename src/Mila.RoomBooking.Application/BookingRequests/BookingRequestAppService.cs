@@ -56,8 +56,6 @@ namespace UniversityBooking.BookingRequests
             query = query
                 .Where(br => br.Status == BookingRequestStatus.Pending)
                 .Include(br => br.Room)
-                .Include(br => br.TimeSlot)
-                .Include(br => br.Day)
                 .Include(br => br.RequestedByUser);
 
             // Get total count
@@ -104,8 +102,6 @@ namespace UniversityBooking.BookingRequests
             query = query
                 .Where(br => br.Status == BookingRequestStatus.Approved)
                 .Include(br => br.Room)
-                .Include(br => br.TimeSlot)
-                .Include(br => br.Day)
                 .Include(br => br.RequestedByUser);
 
             // Get total count
@@ -160,9 +156,6 @@ namespace UniversityBooking.BookingRequests
 
                 // Room selection is now optional for all categories - will be assigned by admin
 
-                if (input.TimeSlotId == Guid.Empty)
-                    throw new UserFriendlyException("Please select a valid time slot.");
-
                 // Validate required fields for all categories
                 if (string.IsNullOrWhiteSpace(input.InstructorName))
                     throw new UserFriendlyException("Instructor name is required.");
@@ -197,8 +190,6 @@ namespace UniversityBooking.BookingRequests
                 // Use the enhanced booking creation for all requests
                 bookingRequest = await _roomBookingManager.CreateEnhancedBookingRequestAsync(
                     input.RoomId,
-                    input.TimeSlotId ?? Guid.NewGuid(), // Use Guid.Empty if TimeSlotId is not provided
-                    input.DayId ?? Guid.NewGuid(), // Use Guid.Empty if DayId is not provided
                     _currentUser.Id.Value,
                     _currentUser.UserName,
                     input.Purpose,
@@ -271,7 +262,6 @@ namespace UniversityBooking.BookingRequests
             {
                 return await _roomBookingManager.IsCategoryAvailableAsync(
                     category,
-                    dayId,
                     bookingDate,
                     startTime,
                     endTime,
@@ -336,11 +326,8 @@ namespace UniversityBooking.BookingRequests
             var query = await _repository.GetQueryableAsync();
 
             query = query
-                .Where(br => br.RequestedById == _currentUser.Id)
-                .Include(br => br.Room)
-                .Include(br => br.TimeSlot)
-                .Include(br => br.Day);
-
+              .Where(br => br.RequestedById == _currentUser.Id)
+              .Include(br => br.Room);
             // Filter by date range if provided
             if (startDate.HasValue)
             {

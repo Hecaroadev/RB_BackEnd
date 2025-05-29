@@ -1,8 +1,6 @@
 // BookingRequest.cs
 using System;
-using UniversityBooking.Days;
 using UniversityBooking.Rooms;
-using UniversityBooking.TimeSlots;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Identity;
 
@@ -12,8 +10,6 @@ namespace UniversityBooking.BookingRequests
     {
         // Basic booking information
         public Guid? RoomId { get; private set; } // Can be Guid.Empty if not assigned yet
-        public Guid? TimeSlotId { get; private set; } // Optional now, since we use custom time ranges
-        public Guid? DayId { get; private set; } // Day of week
         public string? RequestedBy { get; private set; } // Username or email of requestor
         public Guid? RequestedById { get; private set; } // User ID of requestor
         public DateTime RequestDate { get; private set; } // When the request was created
@@ -40,8 +36,6 @@ namespace UniversityBooking.BookingRequests
 
         // Navigation properties
         public virtual Room Room { get; private set; }
-        public virtual TimeSlot TimeSlot { get; private set; }
-        public virtual Day Day { get; private set; }
         public virtual IdentityUser RequestedByUser { get; private set; }
         public virtual IdentityUser ProcessedByUser { get; set; }
 
@@ -52,8 +46,6 @@ namespace UniversityBooking.BookingRequests
         public BookingRequest(
             Guid id,
             Guid? roomId,
-            Guid? timeSlotId,
-            Guid dayId,
             Guid requestedById,
             string requestedBy,
             string purpose,
@@ -72,8 +64,6 @@ namespace UniversityBooking.BookingRequests
         ) : base(id)
         {
           RoomId = roomId ?? null;// Use Empty GUID if no room is assigned yet
-            TimeSlotId = timeSlotId;
-            DayId = dayId;
             RequestedById = requestedById;
             RequestedBy = requestedBy;
             Purpose = purpose;

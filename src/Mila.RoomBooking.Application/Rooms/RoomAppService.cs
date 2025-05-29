@@ -43,9 +43,7 @@ namespace UniversityBooking.Rooms
             var query = await _bookingRepository.GetQueryableAsync();
 
             query = query
-              .Where(b => b.RoomId == id && b.Status == BookingStatus.Active)
-              .Include(b => b.TimeSlot)
-              .Include(b => b.Day);
+              .Where(b => b.RoomId == id && b.Status == BookingStatus.Active);
 
             var bookings = await query.ToListAsync();
 
@@ -59,8 +57,7 @@ namespace UniversityBooking.Rooms
 
             var bookedRoomIds = bookingQuery
                 .Where(b =>
-                    b.TimeSlotId == input.TimeSlotId &&
-                    b.DayId == input.DayId &&
+
                     b.Status == BookingStatus.Active)
                 .Select(b => b.RoomId);
 
@@ -69,8 +66,6 @@ namespace UniversityBooking.Rooms
 
             var pendingRequestRoomIds = requestQuery
                 .Where(br =>
-                    br.TimeSlotId == input.TimeSlotId &&
-                    br.DayId == input.DayId &&
                     br.Status == BookingRequests.BookingRequestStatus.Pending)
                 .Select(br => br.RoomId);
 
@@ -78,18 +73,11 @@ namespace UniversityBooking.Rooms
             var query = await Repository.GetQueryableAsync();
 
             query = query
-                .Where(r => r.IsActive)
-                .Where(r => !bookedRoomIds.Contains(r.Id))
-                .Where(r => !pendingRequestRoomIds.Contains(r.Id));
+              .Where(r => r.IsActive);
+
 
             // Apply filter if provided
-            if (!string.IsNullOrWhiteSpace(input.Filter))
-            {
-                query = query.Where(r =>
-                    r.Number.Contains(input.Filter) ||
-                    r.Building.Contains(input.Filter) ||
-                    r.Description.Contains(input.Filter));
-            }
+
 
             // Get total count
             var totalCount = await query.CountAsync();

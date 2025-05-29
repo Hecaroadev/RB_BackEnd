@@ -52,9 +52,6 @@ namespace Mila.RoomBooking.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
-                    b.Property<Guid?>("DayId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("DeleterId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("DeleterId");
@@ -161,24 +158,17 @@ namespace Mila.RoomBooking.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasDefaultValue("");
 
-                    b.Property<Guid?>("TimeSlotId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("DayId");
 
                     b.HasIndex("ProcessedById");
 
                     b.HasIndex("RequestedById");
 
+                    b.HasIndex("RoomId");
+
                     b.HasIndex("RoomId1");
 
                     b.HasIndex("Status");
-
-                    b.HasIndex("TimeSlotId");
-
-                    b.HasIndex("RoomId", "TimeSlotId", "DayId", "Status");
 
                     b.ToTable("BookingRequests", (string)null);
                 });
@@ -209,10 +199,7 @@ namespace Mila.RoomBooking.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
-                    b.Property<Guid>("DayId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DayId1")
+                    b.Property<Guid?>("DayId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("DeleterId")
@@ -270,9 +257,6 @@ namespace Mila.RoomBooking.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("TimeSlotId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("BookingDate");
@@ -281,15 +265,11 @@ namespace Mila.RoomBooking.Migrations
 
                     b.HasIndex("DayId");
 
-                    b.HasIndex("DayId1");
-
                     b.HasIndex("ReservedById");
 
+                    b.HasIndex("RoomId");
+
                     b.HasIndex("Status");
-
-                    b.HasIndex("TimeSlotId");
-
-                    b.HasIndex("RoomId", "TimeSlotId", "BookingDate", "Status");
 
                     b.ToTable("Bookings", (string)null);
                 });
@@ -2405,11 +2385,6 @@ namespace Mila.RoomBooking.Migrations
 
             modelBuilder.Entity("UniversityBooking.BookingRequests.BookingRequest", b =>
                 {
-                    b.HasOne("UniversityBooking.Days.Day", "Day")
-                        .WithMany()
-                        .HasForeignKey("DayId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "ProcessedByUser")
                         .WithMany()
                         .HasForeignKey("ProcessedById")
@@ -2429,20 +2404,11 @@ namespace Mila.RoomBooking.Migrations
                         .WithMany("BookingRequests")
                         .HasForeignKey("RoomId1");
 
-                    b.HasOne("UniversityBooking.TimeSlots.TimeSlot", "TimeSlot")
-                        .WithMany()
-                        .HasForeignKey("TimeSlotId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Day");
-
                     b.Navigation("ProcessedByUser");
 
                     b.Navigation("RequestedByUser");
 
                     b.Navigation("Room");
-
-                    b.Navigation("TimeSlot");
                 });
 
             modelBuilder.Entity("UniversityBooking.Bookings.Booking", b =>
@@ -2452,15 +2418,9 @@ namespace Mila.RoomBooking.Migrations
                         .HasForeignKey("BookingRequestId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("UniversityBooking.Days.Day", "Day")
-                        .WithMany()
-                        .HasForeignKey("DayId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("UniversityBooking.Days.Day", null)
                         .WithMany("Bookings")
-                        .HasForeignKey("DayId1");
+                        .HasForeignKey("DayId");
 
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "ReservedByUser")
                         .WithMany()
@@ -2474,20 +2434,11 @@ namespace Mila.RoomBooking.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("UniversityBooking.TimeSlots.TimeSlot", "TimeSlot")
-                        .WithMany()
-                        .HasForeignKey("TimeSlotId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("BookingRequest");
-
-                    b.Navigation("Day");
 
                     b.Navigation("ReservedByUser");
 
                     b.Navigation("Room");
-
-                    b.Navigation("TimeSlot");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>

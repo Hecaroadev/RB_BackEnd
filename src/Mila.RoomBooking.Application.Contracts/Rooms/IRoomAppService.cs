@@ -9,7 +9,7 @@ using Volo.Abp.Application.Services;
 
 namespace UniversityBooking.Rooms
 {
-    public interface IRoomAppService : 
+    public interface IRoomAppService :
         ICrudAppService<
     RoomDto,
     Guid,
@@ -20,12 +20,9 @@ namespace UniversityBooking.Rooms
     Task<List<BookingDto>> GetBookingsAsync(Guid id, Guid? semesterId = null);
     Task<PagedResultDto<RoomDto>> GetAvailableRoomsAsync(GetAvailableRoomsInput input);
     }
-    
+
     public class GetAvailableRoomsInput : PagedAndSortedResultRequestDto
     {
-        public Guid TimeSlotId { get; set; }
-        public Guid DayId { get; set; }
-        public Guid SemesterId { get; set; }
-        public string Filter { get; set; }
+
     }
 }
