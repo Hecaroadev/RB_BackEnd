@@ -6,15 +6,19 @@ function _assertClassBrand(e, t, n) {
   if ("function" == typeof e ? e === t : e.has(t)) return arguments.length < 3 ? t : n;
   throw new TypeError("Private element is not present on this object");
 }
+
 function _checkPrivateRedeclaration(e, t) {
   if (t.has(e)) throw new TypeError("Cannot initialize the same private elements twice on an object");
 }
+
 function _classPrivateFieldGet2(s, a) {
   return s.get(_assertClassBrand(s, a));
 }
+
 function _classPrivateFieldInitSpec(e, t, a) {
   _checkPrivateRedeclaration(e, t), t.set(e, a);
 }
+
 function _classPrivateFieldSet2(s, a, r) {
   return s.set(_assertClassBrand(s, a), r), r;
 }
@@ -302,17 +306,17 @@ const getFocusableElements = () => {
   /** @type {NodeListOf<HTMLElement>} */
   const focusableElementsWithTabindex = popup.querySelectorAll('[tabindex]:not([tabindex="-1"]):not([tabindex="0"])');
   const focusableElementsWithTabindexSorted = Array.from(focusableElementsWithTabindex)
-  // sort according to tabindex
-  .sort((a, b) => {
-    const tabindexA = parseInt(a.getAttribute('tabindex') || '0');
-    const tabindexB = parseInt(b.getAttribute('tabindex') || '0');
-    if (tabindexA > tabindexB) {
-      return 1;
-    } else if (tabindexA < tabindexB) {
-      return -1;
-    }
-    return 0;
-  });
+    // sort according to tabindex
+    .sort((a, b) => {
+      const tabindexA = parseInt(a.getAttribute('tabindex') || '0');
+      const tabindexB = parseInt(b.getAttribute('tabindex') || '0');
+      if (tabindexA > tabindexB) {
+        return 1;
+      } else if (tabindexA < tabindexB) {
+        return -1;
+      }
+      return 0;
+    });
 
   /** @type {NodeListOf<HTMLElement>} */
   const otherFocusableElements = popup.querySelectorAll(focusable);
@@ -1252,7 +1256,7 @@ const renderInputType = {};
  * @returns {HTMLInputElement}
  */
 renderInputType.text = renderInputType.email = renderInputType.password = renderInputType.number = renderInputType.tel = renderInputType.url = renderInputType.search = renderInputType.date = renderInputType['datetime-local'] = renderInputType.time = renderInputType.week = renderInputType.month = /** @type {(input: Input | HTMLElement, params: SweetAlertOptions) => Input} */
-(input, params) => {
+  (input, params) => {
   checkAndSetInputValue(input, params.inputValue);
   setInputLabel(input, input, params);
   setInputPlaceholder(input, params);
@@ -2201,12 +2205,12 @@ const shouldPreventTouchMove = event => {
     return true;
   }
   if (!isScrollable(container) && target instanceof HTMLElement && target.tagName !== 'INPUT' &&
-  // #1603
-  target.tagName !== 'TEXTAREA' &&
-  // #2266
-  !(isScrollable(htmlContainer) &&
-  // #1944
-  htmlContainer.contains(target))) {
+    // #1603
+    target.tagName !== 'TEXTAREA' &&
+    // #2266
+    !(isScrollable(htmlContainer) &&
+      // #1944
+      htmlContainer.contains(target))) {
     return true;
   }
   return false;
@@ -2342,6 +2346,7 @@ function close(resolveValue) {
     swalPromiseResolve(resolveValue);
   }
 }
+
 const triggerClosePopup = instance => {
   const popup = getPopup();
   if (!popup) {
@@ -2931,6 +2936,7 @@ function hideLoading() {
   domCache.denyButton.disabled = false;
   domCache.cancelButton.disabled = false;
 }
+
 const showRelatedButton = domCache => {
   const buttonToReplace = domCache.popup.getElementsByClassName(domCache.loader.getAttribute('data-button-to-replace'));
   if (buttonToReplace.length) {
@@ -3434,7 +3440,8 @@ let ignoreOutsideClick = false;
 const handleModalMousedown = domCache => {
   domCache.popup.onmousedown = () => {
     domCache.container.onmouseup = function (e) {
-      domCache.container.onmouseup = () => {};
+      domCache.container.onmouseup = () => {
+      };
       // We only check if the mouseup target is the container because usually it doesn't
       // have any other direct children aside of the popup
       if (e.target === domCache.container) {
@@ -3454,7 +3461,8 @@ const handleContainerMousedown = domCache => {
       e.preventDefault();
     }
     domCache.popup.onmouseup = function (e) {
-      domCache.popup.onmouseup = () => {};
+      domCache.popup.onmouseup = () => {
+      };
       // We also need to check if the mouseup target is a child of the popup
       if (e.target === domCache.popup || e.target instanceof HTMLElement && domCache.popup.contains(e.target)) {
         ignoreOutsideClick = true;
@@ -3537,6 +3545,7 @@ function mixin(mixinParams) {
       return super._main(params, Object.assign({}, mixinParams, priorityMixinParams));
     }
   }
+
   // @ts-ignore
   return MixinSwal;
 }
@@ -3629,6 +3638,7 @@ function bindClickHandler() {
     bodyClickListenerAdded = true;
   }
 }
+
 const bodyClickListener = event => {
   for (let el = event.target; el && el !== document; el = el.parentNode) {
     for (const attr in clickHandlers) {
@@ -3703,16 +3713,16 @@ class EventEmitter {
       args[_key2 - 1] = arguments[_key2];
     }
     this._getHandlersByEventName(eventName).forEach(
-    /**
-     * @param {EventHandler} eventHandler
-     */
-    eventHandler => {
-      try {
-        eventHandler.apply(this, args);
-      } catch (error) {
-        console.error(error);
-      }
-    });
+      /**
+       * @param {EventHandler} eventHandler
+       */
+      eventHandler => {
+        try {
+          eventHandler.apply(this, args);
+        } catch (error) {
+          console.error(error);
+        }
+      });
   }
 
   /**
@@ -3736,6 +3746,7 @@ class EventEmitter {
       this.events[eventName].length = 0;
     }
   }
+
   reset() {
     this.events = {};
   }
@@ -4296,6 +4307,7 @@ function setParameters(params) {
 /** @type {SweetAlert} */
 let currentInstance;
 var _promise = /*#__PURE__*/new WeakMap();
+
 class SweetAlert {
   /**
    * @param {...any} args
@@ -4325,6 +4337,7 @@ class SweetAlert {
     this.isAwaitingPromise = false;
     _classPrivateFieldSet2(_promise, this, this._main(currentInstance.params));
   }
+
   _main(userParams) {
     let mixinParams = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     showWarningsForParams(Object.assign({}, mixinParams, userParams));
@@ -4366,6 +4379,7 @@ class SweetAlert {
   then(onFulfilled) {
     return _classPrivateFieldGet2(_promise, this).then(onFulfilled);
   }
+
   finally(onFinally) {
     return _classPrivateFieldGet2(_promise, this).finally(onFinally);
   }
@@ -4619,4 +4633,4 @@ const Swal = SweetAlert;
 // @ts-ignore
 Swal.default = Swal;
 
-export { Swal as default };
+export {Swal as default};
