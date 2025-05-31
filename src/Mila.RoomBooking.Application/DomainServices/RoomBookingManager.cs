@@ -347,7 +347,7 @@ namespace UniversityBooking.Rooms
         [UnitOfWork]
         public async Task<BookingRequest> CreateEnhancedBookingRequestAsync(
             Guid? roomId,
-            Guid requestedById,
+            Guid? requestedById,
             string requestedBy,
             string purpose,
             IdentityUser requestedByUser,

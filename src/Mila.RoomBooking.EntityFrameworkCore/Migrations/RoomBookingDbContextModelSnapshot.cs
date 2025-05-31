@@ -241,11 +241,13 @@ namespace Mila.RoomBooking.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ReservedBy")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid>("ReservedById")
+                    b.Property<Guid?>("ReservedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ReservedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("RoomId")
@@ -265,7 +267,7 @@ namespace Mila.RoomBooking.Migrations
 
                     b.HasIndex("DayId");
 
-                    b.HasIndex("ReservedById");
+                    b.HasIndex("ReservedByUserId");
 
                     b.HasIndex("RoomId");
 
@@ -2424,9 +2426,7 @@ namespace Mila.RoomBooking.Migrations
 
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "ReservedByUser")
                         .WithMany()
-                        .HasForeignKey("ReservedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ReservedByUserId");
 
                     b.HasOne("UniversityBooking.Rooms.Room", "Room")
                         .WithMany("Bookings")

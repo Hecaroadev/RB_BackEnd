@@ -62,10 +62,10 @@ namespace UniversityBooking.Rooms
         /// </summary>
         Task<BookingRequest> CreateEnhancedBookingRequestAsync(
             Guid? roomId,
-            Guid requestedById,
-            string requestedBy,
+            Guid? requestedById,
+            string? requestedBy,
             string purpose,
-            IdentityUser identityUser,
+            IdentityUser? identityUser,
             DateTime bookingDate,
             RoomCategory category,
             string instructorName,

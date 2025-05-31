@@ -14,7 +14,7 @@ namespace UniversityBooking.Bookings
         public Guid RoomId { get; private set; }
 
         public Guid? BookingRequestId { get; private set; }
-        public Guid ReservedById { get; private set; }
+        public Guid? ReservedById { get; private set; }
         public string ReservedBy { get; private set; }
         public string Purpose { get; private set; }
         public bool IsRecurring { get; private set; }
@@ -25,7 +25,7 @@ namespace UniversityBooking.Bookings
 
         public virtual Room Room { get; private set; }
         public virtual BookingRequest BookingRequest { get; private set; }
-        public virtual IdentityUser ReservedByUser { get; private set; }
+        public virtual IdentityUser? ReservedByUser { get; private set; }
 
         protected Booking()
         {
@@ -34,7 +34,7 @@ namespace UniversityBooking.Bookings
         public Booking(
             Guid id,
             Guid? roomId,
-            Guid reservedById,
+            Guid? reservedById,
             string reservedBy,
             string purpose,
             Guid? bookingRequestId = null,
@@ -62,7 +62,7 @@ namespace UniversityBooking.Bookings
             return new Booking(
                 id,
                 request.RoomId,
-                request.RequestedById ?? Guid.NewGuid(),
+                request.RequestedById ?? null,
                 request.RequestedBy ?? "Unknown",
                 request.Purpose,
                 request.Id,

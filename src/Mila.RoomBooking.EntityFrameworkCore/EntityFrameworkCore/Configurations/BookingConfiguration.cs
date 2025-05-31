@@ -12,8 +12,8 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.ToTable("Bookings");
 
             builder.Property(x => x.RoomId).IsRequired();
-            builder.Property(x => x.ReservedBy).IsRequired().HasMaxLength(256);
-            builder.Property(x => x.ReservedById).IsRequired();
+            builder.Property(x => x.ReservedBy).IsRequired(false).HasMaxLength(256);
+            builder.Property(x => x.ReservedById).IsRequired(false);
             builder.Property(x => x.Purpose).IsRequired().HasMaxLength(500);
             builder.Property(x => x.IsRecurring).IsRequired();
             builder.Property(x => x.Status).IsRequired();
@@ -22,7 +22,6 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
               .IsRequired(true); // Allow
             // Index for faster lookups
             builder.HasIndex(x => x.Status);
-            builder.HasIndex(x => x.ReservedById);
             builder.HasIndex(x => x.BookingRequestId);
             builder.HasIndex(x => x.BookingDate);
 
@@ -41,11 +40,7 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
                 .HasForeignKey(b => b.BookingRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(b => b.ReservedByUser)
-                .WithMany()
-                .HasForeignKey(b => b.ReservedById)
-                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
