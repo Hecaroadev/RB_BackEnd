@@ -4,9 +4,10 @@
     "AppName": "نظام حجز القاعات",
     "Menu:Home": "الرئيسية",
     "Menu:Dashboard": "لوحة التحكم",
+    "Menu:Schedule": "الحجوزات",
     "Menu:RoomBooking": "حجز القاعات",
     "Menu:NewRequest": "طلب جديد",
-    "Menu:BookingsList": "قائمة الحجوزات",
+    "Menu:BookingsList": "طلبات",
     "Menu:ApproveRequests": "الموافقة على الطلبات",
     "Menu:RoomManagement": "إدارة القاعات",
 

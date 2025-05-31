@@ -200,7 +200,7 @@ namespace UniversityBooking.BookingRequests
                 // If user is authenticated and room is selected, auto-approve the request
                 if (isAuthenticated && input.RoomId.HasValue)
                 {
-                    // Create an auto-approved booking request
+                    // Create a booking request
                     bookingRequest = await _roomBookingManager.CreateEnhancedBookingRequestAsync(
                         input.RoomId,
                         requestedById ?? null,
@@ -220,15 +220,26 @@ namespace UniversityBooking.BookingRequests
                         DateTime.Now
                     );
 
-                    // Auto-approve the request
-                    await _roomBookingManager.ApproveBookingRequestAsync(
-                        bookingRequest.Id,
-                        requestedById.Value,
-                        requestedBy
-                    );
+                    // Ensure the request is saved to the database
+                    await CurrentUnitOfWork.SaveChangesAsync();
 
-                    // Reload to get updated status
-                    bookingRequest = await _repository.GetAsync(bookingRequest.Id);
+                    try
+                    {
+                        // Auto-approve the request
+                        await _roomBookingManager.ApproveBookingRequestAsync(
+                            bookingRequest.Id,
+                            requestedById.Value,
+                            requestedBy
+                        );
+
+                        // Reload to get updated status
+                        bookingRequest = await _repository.GetAsync(bookingRequest.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning($"Failed to auto-approve booking request {bookingRequest.Id}: {ex.Message}");
+                        // Continue with the non-approved request
+                    }
                 }
                 else
                 {
@@ -275,13 +286,22 @@ namespace UniversityBooking.BookingRequests
                         "Please fill in all required fields.",
                         details: e.Message);
                 }
-                else
+                else if (e is Volo.Abp.Domain.Entities.EntityNotFoundException)
                 {
                     Logger.LogException(e);
                     throw new UserFriendlyException(
+                        "Unable to process the booking request due to a data synchronization issue. " +
+                        "Please try again in a few moments.",
+                        details: $"Error ID: {Guid.NewGuid()} - Entity not found error: {e.Message}");
+                }
+                else
+                {
+                    var errorId = Guid.NewGuid();
+                    Logger.LogError(e, "Booking request error {ErrorId}: {ErrorMessage}", errorId, e.Message);
+                    throw new UserFriendlyException(
                         "An error occurred while processing your booking request. " +
                         "Please try again or contact support if the problem persists.",
-                        details: $"Error ID: {Guid.NewGuid()}");
+                        details: $"Error ID: {errorId}");
                 }
             }
         }
@@ -317,6 +337,14 @@ namespace UniversityBooking.BookingRequests
 
         public async Task<BookingRequestDto> ProcessAsync(ProcessBookingRequestDto input)
         {
+            // Validate booking request exists before proceeding
+            if (!(await _repository.AnyAsync(br => br.Id == input.BookingRequestId)))
+            {
+                throw new UserFriendlyException(
+                    "Booking request not found. It may have been deleted or already processed.",
+                    details: $"Booking request ID: {input.BookingRequestId}");
+            }
+
             var bookingRequest = await _repository.GetAsync(input.BookingRequestId);
 
             // If this is an approval with room assignment
@@ -325,6 +353,9 @@ namespace UniversityBooking.BookingRequests
                 // Update the RoomId on the booking request before approval
                 bookingRequest.UpdateRoom(input.RoomId.Value);
                 await _repository.UpdateAsync(bookingRequest);
+
+                // Save changes before approval to ensure the update is persisted
+                await CurrentUnitOfWork.SaveChangesAsync();
 
                 // Approve the booking request
                 await _roomBookingManager.ApproveBookingRequestAsync(
