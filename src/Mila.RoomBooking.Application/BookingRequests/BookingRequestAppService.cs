@@ -321,6 +321,7 @@ namespace UniversityBooking.BookingRequests
             return ObjectMapper.Map<BookingRequest, BookingRequestDto>(bookingRequest);
         }
 
+        /*
         public async Task<List<BookingRequestDto>> GetMyRequestsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
             var query = await _repository.GetQueryableAsync();
@@ -347,5 +348,44 @@ namespace UniversityBooking.BookingRequests
 
             return bookingRequestDtos;
         }
+        */
+        // Updated GetMyRequestsAsync method in BookingRequestAppService.cs
+        public async Task<List<BookingRequestDto>> GetMyRequestsAsync(DateTime? startDate = null, DateTime? endDate = null, Guid? roomId = null)
+        {
+          var query = await _repository.GetQueryableAsync();
+
+          query = query
+            .Where(br => br.Status != BookingRequestStatus.Pending)
+            .Include(br => br.Room);
+
+          // Filter by date range if provided
+          if (startDate.HasValue)
+          {
+            query = query.Where(br => br.BookingDate.Date >= startDate.Value.Date);
+          }
+
+          if (endDate.HasValue)
+          {
+            query = query.Where(br => br.BookingDate.Date <= endDate.Value.Date);
+          }
+
+          // Filter by room if provided
+          if (roomId.HasValue)
+          {
+            query = query.Where(br => br.RoomId == roomId.Value);
+          }
+
+          // Order by booking date
+          query = query.OrderBy(br => br.BookingDate);
+
+          // Get the booking requests
+          var bookingRequests = await query.ToListAsync();
+
+          // Convert to DTOs
+          var bookingRequestDtos = ObjectMapper.Map<List<BookingRequest>, List<BookingRequestDto>>(bookingRequests);
+
+          return bookingRequestDtos;
+        }
+
     }
 }
