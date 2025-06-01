@@ -359,7 +359,7 @@ namespace UniversityBooking.BookingRequests
 
                 // Approve the booking request
                 await _roomBookingManager.ApproveBookingRequestAsync(
-                    input.BookingRequestId,
+                    bookingRequest.Id,
                     _currentUser.Id.Value,
                     _currentUser.UserName
                 );
@@ -445,7 +445,7 @@ namespace UniversityBooking.BookingRequests
             {
                 // Get all rooms that match the category
                 var roomQuery = await _roomRepository.GetQueryableAsync();
-                roomQuery = roomQuery.Where(r => r.Category == category);
+                  roomQuery = roomQuery.Where(r => r.Category == category);
 
                 // Filter by capacity if required
                 if (requiredCapacity > 0)

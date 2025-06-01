@@ -165,7 +165,7 @@ namespace UniversityBooking.BookingRequests
             }
         }
 
-        public void UpdateRoom(Guid roomId)
+        public void UpdateRoom(Guid? roomId)
         {
             if (Status == BookingRequestStatus.Pending)
             {

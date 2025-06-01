@@ -37,7 +37,8 @@ namespace UniversityBooking.Rooms
             Guid? roomId,
             DateTime bookingDate,
             TimeSpan startTime,
-            TimeSpan endTime)
+            TimeSpan endTime,
+            Guid? excludeRequestId = null) // Add new parameter)
         {
             // If roomId is null or empty, we're checking if any room is available
             if (!roomId.HasValue || roomId.Value == Guid.Empty)
@@ -80,15 +81,21 @@ namespace UniversityBooking.Rooms
             }
 
             // Check pending requests for the same time range
+            // Pending requests query
             var pendingRequestsQuery = await _bookingRequestRepository.GetQueryableAsync();
-            var pendingRequests = await pendingRequestsQuery
-                .Where(br => br.RoomId == roomId &&
-                            br.BookingDate.Date == bookingDate.Date &&
-                            br.Status == BookingRequestStatus.Pending)
-                .ToListAsync();
+            pendingRequestsQuery = pendingRequestsQuery
+              .Where(br => br.RoomId == roomId &&
+                           br.BookingDate.Date == bookingDate.Date &&
+                           br.Status == BookingRequestStatus.Pending);
+
+            // EXCLUDE CURRENT REQUEST
+            if (excludeRequestId.HasValue)
+            {
+              pendingRequestsQuery = pendingRequestsQuery.Where(br => br.Id != excludeRequestId.Value);
+            }
 
             // Check if any pending request overlaps with the requested time range
-            foreach (var request in pendingRequests)
+            foreach (var request in pendingRequestsQuery)
             {
                 // If we have a pending request with a time range that overlaps with our requested time range
                 if (request.StartTime < endTime && request.EndTime > startTime)
@@ -165,10 +172,11 @@ namespace UniversityBooking.Rooms
             {
                 // Check if the room is still available
                 bool isAvailable = await IsRoomAvailableAsync(
-                    bookingRequest.RoomId,
-                    bookingRequest.BookingDate,
-                    bookingRequest.StartTime,
-                    bookingRequest.EndTime);
+                  bookingRequest.RoomId,
+                  bookingRequest.BookingDate,
+                  bookingRequest.StartTime,
+                  bookingRequest.EndTime,
+                  bookingRequest.Id);
 
                 if (!isAvailable)
                 {

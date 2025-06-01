@@ -94,7 +94,7 @@ namespace UniversityBooking.Data
                         "Computer Lab for engineering students"
                     )
                 );
-                
+
                 await _roomRepository.InsertAsync(
                     new Room(
                         _guidGenerator.Create(),
@@ -102,11 +102,14 @@ namespace UniversityBooking.Data
                         "Engineering",
                         "First",
                         60,
+
                         RoomType.Classroom,
                         "Classroom for engineering lectures"
+                          ,
+                        RoomCategory.Lab
                     )
                 );
-                
+
                 await _roomRepository.InsertAsync(
                     new Room(
                         _guidGenerator.Create(),

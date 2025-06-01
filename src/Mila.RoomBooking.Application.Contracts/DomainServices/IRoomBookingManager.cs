@@ -10,11 +10,12 @@ namespace UniversityBooking.Rooms
 {
     public interface IRoomBookingManager
     {
-        Task<bool> IsRoomAvailableAsync(
-            Guid? roomId,
-            DateTime bookingDate,
-            TimeSpan startTime,
-            TimeSpan endTime);
+      Task<bool> IsRoomAvailableAsync(
+        Guid? roomId,
+        DateTime bookingDate,
+        TimeSpan startTime,
+        TimeSpan endTime,
+        Guid? excludeRequestId = null);
 
         /// <summary>
         /// Find an available room matching category and requirements for the given date and time

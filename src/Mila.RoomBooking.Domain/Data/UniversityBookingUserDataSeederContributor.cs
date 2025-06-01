@@ -139,6 +139,10 @@ namespace UniversityBooking.Data
                 ("admin", UniversityBookingPermissions.Room.Create),
                 ("admin", UniversityBookingPermissions.Room.Update),
                 ("admin", UniversityBookingPermissions.Room.Delete),
+                ("admin", UniversityBookingPermissions.BookingRequest.Default),
+                ("admin", UniversityBookingPermissions.BookingRequest.Default),
+                ("admin", UniversityBookingPermissions.BookingRequest.Manage),
+
 
                 // Instructor permissions
                 ("instructor", UniversityBookingPermissions.BookingRequest.Default),
