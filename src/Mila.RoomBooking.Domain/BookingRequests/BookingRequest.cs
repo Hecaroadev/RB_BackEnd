@@ -1,6 +1,9 @@
 // BookingRequest.cs
 using System;
+using System.ComponentModel.DataAnnotations;
+using UniversityBooking.Days;
 using UniversityBooking.Rooms;
+using UniversityBooking.TimeSlots;
 using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Identity;
 
@@ -8,173 +11,190 @@ namespace UniversityBooking.BookingRequests
 {
     public class BookingRequest : FullAuditedAggregateRoot<Guid>
     {
-      // Basic booking information
-      public BookingRequest(Guid? roomId, string requestedBy, Guid? requestedById, DateTime requestDate, DateTime bookingDate, TimeSpan startTime, TimeSpan endTime, string purpose, BookingRequestStatus status, DateTime? processedDate, string processedBy, Guid? processedById, RoomCategory category, string instructorName, string subject, int numberOfStudents, bool isRecurring, int recurringWeeks, SoftwareTool requiredTools, Room room, IdentityUser requestedByUser, IdentityUser processedByUser)
-      {
-        RoomId = roomId;
-        RequestedBy = requestedBy;
-        RequestedById = requestedById ?? null;
-        RequestDate = requestDate;
-        BookingDate = bookingDate;
-        StartTime = startTime;
-        EndTime = endTime;
-        Purpose = purpose;
-        Status = status;
-        ProcessedDate = processedDate;
-        ProcessedBy = processedBy;
-        ProcessedById = processedById;
-        Category = category;
-        InstructorName = instructorName;
-        Subject = subject;
-        NumberOfStudents = numberOfStudents;
-        IsRecurring = isRecurring;
-        RecurringWeeks = recurringWeeks;
-        RequiredTools = requiredTools;
-        Room = room;
-        RequestedByUser = requestedByUser;
-        ProcessedByUser = processedByUser;
-      }
+        // Room and scheduling properties
+        public RoomCategory? Category { get; set; }
+        public Guid? RoomId { get; set; }
+        public virtual Room Room { get; set; }
 
-      public BookingRequest(Guid id, Guid? roomId, string requestedBy, Guid? requestedById, DateTime requestDate, DateTime bookingDate, TimeSpan startTime, TimeSpan endTime, string purpose, BookingRequestStatus status, DateTime? processedDate, string processedBy, Guid? processedById, RoomCategory category, string instructorName, string subject, int numberOfStudents, bool isRecurring, int recurringWeeks, SoftwareTool requiredTools, Room room, IdentityUser requestedByUser, IdentityUser processedByUser) : base(id)
-      {
-        RoomId = roomId;
-        RequestedBy = requestedBy;
-        RequestedById = requestedById ?? null;
-        RequestDate = requestDate;
-        BookingDate = bookingDate;
-        StartTime = startTime;
-        EndTime = endTime;
-        Purpose = purpose;
-        Status = status;
-        ProcessedDate = processedDate;
-        ProcessedBy = processedBy;
-        ProcessedById = processedById;
-        Category = category;
-        InstructorName = instructorName;
-        Subject = subject;
-        NumberOfStudents = numberOfStudents;
-        IsRecurring = isRecurring;
-        RecurringWeeks = recurringWeeks;
-        RequiredTools = requiredTools;
-        Room = room;
-        RequestedByUser = requestedByUser;
-        ProcessedByUser = processedByUser;
-      }
+        public Guid DayId { get; set; }
+        public virtual Day Day { get; set; }
 
-      public Guid? RoomId { get; private set; } // Can be null if not assigned yet
-      public string RequestedBy { get; private set; } // Username, email, or "Anonymous User"
-      public Guid? RequestedById { get; private set; } // User ID of requestor (null for anonymous)
-      public DateTime RequestDate { get; private set; } // When the request was created
-      public DateTime BookingDate { get; private set; } // The specific calendar date for the booking
-      public TimeSpan StartTime { get; private set; } // Start time of booking
-      public TimeSpan EndTime { get; private set; } // End time of booking
-      public string Purpose { get; private set; }
-      public BookingRequestStatus Status { get; private set; }
-      public string? RejectionReason { get; private set; } = string.Empty;
-      public DateTime? ProcessedDate { get; private set; }
-      public string ProcessedBy { get; private set; }
-      public Guid? ProcessedById { get; private set; }
+        public Guid? TimeSlotId { get; set; }
+        public virtual TimeSlot TimeSlot { get; set; }
 
-      // New fields for enhanced booking process
-      public RoomCategory Category { get; private set; } // Room category for the request
-      public string InstructorName { get; private set; } // Name of the instructor
-      public string Subject { get; private set; } // Subject for the class/event
-      public int NumberOfStudents { get; private set; } // Number of students (for capacity planning)
-      public bool IsRecurring { get; private set; } // Whether this booking should repeat weekly
-      public int RecurringWeeks { get; private set; } // How many weeks to repeat (if recurring)
-      public SoftwareTool RequiredTools { get; private set; } // Software tools required (for labs)
+        public Guid? SemesterId { get; set; }
 
-      // Navigation properties
-      public virtual Room Room { get; private set; }
-      public virtual IdentityUser RequestedByUser { get; private set; }
-      public virtual IdentityUser ProcessedByUser { get; set; }
+        // New time range properties
+        public DateTime? BookingDate { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
 
+        // Request details
+        [Required]
+        [StringLength(500)]
+        public string Purpose { get; set; }
+
+        [StringLength(100)]
+        public string InstructorName { get; set; }
+
+        [StringLength(100)]
+        public string Subject { get; set; }
+
+        // Lab-specific properties
+        public int NumberOfStudents { get; set; }
+        public SoftwareTool RequiredTools { get; set; }
+
+        // Recurring properties
+        public bool IsRecurring { get; set; }
+        public int RecurringWeeks { get; set; }
+
+        // Request status and processing
+        public BookingRequestStatus Status { get; set; }
+
+        public Guid RequestedById { get; set; }
+        public virtual IdentityUser RequestedByUser { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string RequestedBy { get; set; }
+
+        public DateTime RequestDate { get; set; }
+
+        // Processing information
+        public Guid? ProcessedById { get; set; }
+        public string ProcessedBy { get; set; }
+        public DateTime? ProcessedDate { get; set; }
+        public string RejectionReason { get; set; }
 
         protected BookingRequest()
         {
+            // For EF Core
         }
 
         public BookingRequest(
             Guid id,
             Guid? roomId,
-            Guid? requestedById,
+            Guid? timeSlotId,
+            Guid dayId,
+            Guid? semesterId,
+            Guid requestedById,
             string requestedBy,
             string purpose,
             IdentityUser requestedByUser,
-            DateTime bookingDate,
-            TimeSpan startTime,
-            TimeSpan endTime,
-            // New parameters
-            RoomCategory category = RoomCategory.Regular,
-            string instructorName = null,
-            string subject = null,
-            int numberOfStudents = 0,
-            bool isRecurring = false,
-            int recurringWeeks = 0,
-            SoftwareTool requiredTools = SoftwareTool.None
-        ) : base(id)
+            DateTime? requestedDate = null) : base(id)
         {
-          RoomId = roomId ?? null;// Use Empty GUID if no room is assigned yet
-            RequestedById = requestedById ?? null; // Use null if anonymous
+            RoomId = roomId;
+            TimeSlotId = timeSlotId;
+            DayId = dayId;
+            SemesterId = semesterId;
+            RequestedById = requestedById;
             RequestedBy = requestedBy;
             Purpose = purpose;
-            RequestDate = DateTime.Now;
+            RequestedByUser = requestedByUser;
+            RequestDate = requestedDate ?? DateTime.UtcNow;
             Status = BookingRequestStatus.Pending;
-            ProcessedBy = requestedBy;
-            ProcessedByUser = requestedByUser;
-            BookingDate = bookingDate;
+
+            // Initialize default values
+            NumberOfStudents = 0;
+            RequiredTools = SoftwareTool.None;
+            IsRecurring = false;
+            RecurringWeeks = 0;
+        }
+
+        // Methods for the new workflow
+        public void SetCategory(RoomCategory category)
+        {
+            Category = category;
+        }
+
+        public void SetTimeRange(string startTime, string endTime)
+        {
             StartTime = startTime;
             EndTime = endTime;
+        }
 
-            // Initialize new fields
-            Category = category;
-            InstructorName = instructorName ?? string.Empty;
-            Subject = subject ?? string.Empty;
+        public void SetClassDetails(string instructorName, string subject)
+        {
+            InstructorName = instructorName;
+            Subject = subject;
+        }
+
+        public void SetLabRequirements(int numberOfStudents, SoftwareTool requiredTools)
+        {
             NumberOfStudents = numberOfStudents;
+            RequiredTools = requiredTools;
+        }
+
+        public void SetRecurringDetails(bool isRecurring, int recurringWeeks)
+        {
             IsRecurring = isRecurring;
             RecurringWeeks = recurringWeeks;
-            RequiredTools = requiredTools;
+        }
+
+        public void AssignRoom(Guid roomId)
+        {
+            RoomId = roomId;
         }
 
         public void Approve(Guid processedById, string processedBy)
         {
+            if (Status != BookingRequestStatus.Pending)
+            {
+                throw new InvalidOperationException("Only pending requests can be approved.");
+            }
+
             Status = BookingRequestStatus.Approved;
             ProcessedById = processedById;
             ProcessedBy = processedBy;
-            ProcessedDate = DateTime.Now;
+            ProcessedDate = DateTime.UtcNow;
         }
 
         public void Reject(Guid processedById, string processedBy, string rejectionReason)
         {
+            if (Status != BookingRequestStatus.Pending)
+            {
+                throw new InvalidOperationException("Only pending requests can be rejected.");
+            }
+
             Status = BookingRequestStatus.Rejected;
             ProcessedById = processedById;
             ProcessedBy = processedBy;
+            ProcessedDate = DateTime.UtcNow;
             RejectionReason = rejectionReason;
-            ProcessedDate = DateTime.Now;
         }
 
-        public void Cancel()
+        public bool IsForTimeRange()
         {
-            if (Status == BookingRequestStatus.Pending)
-            {
-                Status = BookingRequestStatus.Cancelled;
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot cancel a request that is not pending.");
-            }
+            return !string.IsNullOrEmpty(StartTime) && !string.IsNullOrEmpty(EndTime);
         }
 
-        public void UpdateRoom(Guid roomId)
+        public bool IsForTimeSlot()
         {
-            if (Status == BookingRequestStatus.Pending)
+            return TimeSlotId.HasValue;
+        }
+
+        public string GetDisplayTimeRange()
+        {
+            if (IsForTimeRange())
             {
-                RoomId = roomId;
+                return $"{StartTime} - {EndTime}";
             }
-            else
+            else if (TimeSlot != null)
             {
-                throw new InvalidOperationException("Cannot update room for a request that is not pending.");
+                return TimeSlot.Name;
             }
+            return "Time not specified";
+        }
+
+        public string GetDisplayDate()
+        {
+            if (BookingDate.HasValue)
+            {
+                return BookingDate.Value.ToString("yyyy-MM-dd");
+            }
+            return "Date not specified";
         }
     }
+
+
 }

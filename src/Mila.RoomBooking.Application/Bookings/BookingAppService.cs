@@ -112,7 +112,7 @@ namespace UniversityBooking.Bookings
             // Apply date filter if provided
             if (date.HasValue)
             {
-                query = query.Where(b => b.BookingDate == null || b.BookingDate.Value.Date == date.Value.Date);
+                query = query.Where(b => b.BookingDate == null || b.BookingDate.Date == date.Value.Date);
             }
 
             // Only get active bookings

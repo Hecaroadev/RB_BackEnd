@@ -98,7 +98,17 @@ public class RoomBookingDbContext :
         builder.ApplyConfiguration(new BookingConfiguration());
         builder.ApplyConfiguration(new AvailabilityAnnouncementConfiguration());
         /* Configure your own tables/entities inside here */
+        builder.ApplyConfiguration(new BookingConfiguration());
+        builder.ApplyConfiguration(new BookingRequestConfiguration());
+        builder.ApplyConfiguration(new DayConfiguration());
+        builder.ApplyConfiguration(new RoomConfiguration());
+        builder.ApplyConfiguration(new TimeSlotConfiguration());
 
+        // New configurations
+        //builder.ApplyConfiguration(new CalendarDayItemConfiguration());
+      //  builder.ApplyConfiguration(new WeeklyCalendarConfiguration());
+        builder.ApplyConfiguration(new CalendarDayConfiguration());
+        builder.ApplyConfiguration(new CalendarWeekConfiguration());
         //builder.Entity<YourEntity>(b =>
         //{
         //    b.ToTable(RoomBookingConsts.DbTablePrefix + "YourEntities", RoomBookingConsts.DbSchema);

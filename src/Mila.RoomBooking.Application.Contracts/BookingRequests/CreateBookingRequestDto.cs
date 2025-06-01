@@ -7,36 +7,58 @@ namespace UniversityBooking.BookingRequests.Dtos
 {
     public class CreateBookingRequestDto
     {
-        public RoomCategory Category { get; set; }
-        public Guid? RoomId { get; set; } // Optional - will be assigned by admin or selected by authenticated user
+        // Room category is required for the new workflow
+        [Required]
+        public RoomCategory? Category { get; set; }
 
+        // Room ID is optional - will be assigned by admin during approval
+        public Guid? RoomId { get; set; }
+
+        // Day ID is required
+        [Required]
+        public Guid? DayId { get; set; }
+
+        // Time slot ID is optional in the new workflow
+        public Guid? TimeSlotId { get; set; }
+
+        // Semester ID is optional in the new workflow
+        public Guid? SemesterId { get; set; }
+
+        // Booking date is required
+        [Required]
+        public DateTime? BookingDate { get; set; }
+
+        // Time range is required for the new workflow
+        [Required]
+        [StringLength(5)] // HH:mm format
+        public string StartTime { get; set; }
+
+        [Required]
+        [StringLength(5)] // HH:mm format
+        public string EndTime { get; set; }
+
+        // Class/Event details
         [Required]
         [StringLength(500)]
         public string Purpose { get; set; }
 
-        // Date and time information
         [Required]
-        public DateTime BookingDate { get; set; }
-
-        // Explicit time range (required)
-        [Required]
-        public TimeSpan StartTime { get; set; }
-
-        [Required]
-        public TimeSpan EndTime { get; set; }
+        [StringLength(100)]
         public string InstructorName { get; set; }
+
         [Required]
         [StringLength(100)]
         public string Subject { get; set; }
 
-        // Capacity planning - especially for labs
-        [Range(0, 1000)]
-        public int NumberOfStudents { get; set; }
-        public bool IsRecurring { get; set; }
-        public int RecurringWeeks { get; set; }
-        public SoftwareTool RequiredTools { get; set; }
+        // Lab-specific requirements
+        public int? NumberOfStudents { get; set; }
 
-        // New field for anonymous users
-        public string? AnonymousUserEmail { get; set; } // Email for anonymous users to track their requests
+        public SoftwareTool? RequiredTools { get; set; }
+
+        // Recurring options
+        public bool IsRecurring { get; set; } = false;
+
+        [Range(1, 16)]
+        public int? RecurringWeeks { get; set; }
     }
 }

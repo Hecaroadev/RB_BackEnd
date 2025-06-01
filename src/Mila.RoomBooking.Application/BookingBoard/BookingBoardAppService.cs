@@ -112,12 +112,6 @@ namespace UniversityBooking.BookingBoard
             var bookings = await bookingQuery
                 .Include(b => b.Room)
                 .Where(b => b.Status == BookingStatus.Active)
-                .Where(b =>
-                    // Include specific date bookings within the week range
-                    (b.BookingDate.HasValue && b.BookingDate.Value.Date >= weekStart.Date && b.BookingDate.Value.Date <= weekEnd.Date) ||
-                    // Include recurring bookings (no specific date) for the days in this week
-                    (!b.BookingDate.HasValue)
-                )
                 .WhereIf(roomId.HasValue, b => b.RoomId == roomId.Value)
                 .ToListAsync();
 

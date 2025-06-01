@@ -15,10 +15,8 @@ namespace UniversityBooking.BookingRequests
         Task<BookingRequestDto> GetAsync(Guid id);
         Task<BookingRequestDto> CreateAsync(CreateBookingRequestDto input);
         Task<BookingRequestDto> ProcessAsync(ProcessBookingRequestDto input);
-        Task<PagedResultDto<BookingRequestDto>> GetAllRequestsAsync();
-
-        Task<List<BookingRequestDto>> GetMyRequestsAsync(DateTime? startDate = null,
-          DateTime? endDate = null, Guid? roomId = null);
+      //  Task<PagedResultDto<BookingRequestDto>> GetAllRequestsAsync();
+        Task<List<BookingRequestDto>> GetMyRequestsAsync();
 
         /// <summary>
         /// Check if a room category is available for the specified time range

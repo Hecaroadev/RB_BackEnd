@@ -80,13 +80,4 @@ namespace UniversityBooking.Rooms
             AvailableTools = availableTools;
         }
     }
-
-    public enum RoomType
-    {
-        Classroom,
-        Laboratory,
-        LectureHall,
-        MeetingRoom,
-        ComputerLab
-    }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AutoMapper;
 using UniversityBooking.BookingBoard;
 using UniversityBooking.BookingBoard.Dtos;
@@ -31,13 +32,9 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
 
         // Day
         CreateMap<Day, DayDto>();
-
+          CreateMap<List<BookingRequest> , List<BookingRequestDto>>();
         // BookingRequest
-        CreateMap<BookingRequest, BookingRequestDto>()
-          .ForMember(
-            dest => dest.Room,
-            opt => opt.MapFrom(src => src.Room))
-          ;
+        CreateMap<BookingRequestDto, BookingRequest>();
         CreateMap<Booking, BookingDto>()
           .ForMember(
             dest => dest.Room,
