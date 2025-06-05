@@ -14,19 +14,19 @@ namespace UniversityBooking.Rooms
         public string Floor { get; private set; }
         public int Capacity { get; private set; }
         public string Description { get; private set; }
-        public RoomType Type { get; private set; }
         public bool IsActive { get; set; }
-        
+
+
         /// <summary>
         /// The category of room for booking process
         /// </summary>
-        public RoomCategory Category { get; private set; }
-        
+        public virtual RoomCategory Category { get; private set; }
+
         /// <summary>
         /// Software tools available in this room (if applicable)
         /// </summary>
         public SoftwareTool AvailableTools { get; private set; }
-        
+
         public virtual ICollection<Booking> Bookings { get; private set; }
         public virtual ICollection<BookingRequest> BookingRequests { get; private set; }
 
@@ -40,7 +40,6 @@ namespace UniversityBooking.Rooms
             string building,
             string floor,
             int capacity,
-            RoomType type,
             string description = null,
             RoomCategory category = RoomCategory.Regular,
             SoftwareTool availableTools = SoftwareTool.None
@@ -50,12 +49,11 @@ namespace UniversityBooking.Rooms
             Building = building;
             Floor = floor;
             Capacity = capacity;
-            Type = type;
             Description = description;
             Category = category;
             AvailableTools = availableTools;
             IsActive = true;
-            
+
             Bookings = new List<Booking>();
             BookingRequests = new List<BookingRequest>();
         }
@@ -65,7 +63,6 @@ namespace UniversityBooking.Rooms
             string building,
             string floor,
             int capacity,
-            RoomType type,
             string description = null,
             RoomCategory category = RoomCategory.Regular,
             SoftwareTool availableTools = SoftwareTool.None)
@@ -74,19 +71,11 @@ namespace UniversityBooking.Rooms
             Building = building;
             Floor = floor;
             Capacity = capacity;
-            Type = type;
             Description = description;
             Category = category;
             AvailableTools = availableTools;
         }
     }
 
-    public enum RoomType
-    {
-        Classroom,
-        Laboratory,
-        LectureHall,
-        MeetingRoom,
-        ComputerLab
-    }
+
 }

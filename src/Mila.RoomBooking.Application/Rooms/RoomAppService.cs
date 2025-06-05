@@ -56,17 +56,14 @@ namespace UniversityBooking.Rooms
             var bookingQuery = await _bookingRepository.GetQueryableAsync();
 
             var bookedRoomIds = bookingQuery
-                .Where(b =>
-
-                    b.Status == BookingStatus.Active)
+                .Where(b => b.Status == BookingStatus.Active)
                 .Select(b => b.RoomId);
 
             // Get pending booking requests for the specified time slot, day, and semester
             var requestQuery = await _bookingRequestRepository.GetQueryableAsync();
 
             var pendingRequestRoomIds = requestQuery
-                .Where(br =>
-                    br.Status == BookingRequests.BookingRequestStatus.Pending)
+                .Where(br => br.Status == BookingRequests.BookingRequestStatus.Pending)
                 .Select(br => br.RoomId);
 
             // Get all available rooms
@@ -74,10 +71,6 @@ namespace UniversityBooking.Rooms
 
             query = query
               .Where(r => r.IsActive);
-
-
-            // Apply filter if provided
-
 
             // Get total count
             var totalCount = await query.CountAsync();
@@ -105,6 +98,14 @@ namespace UniversityBooking.Rooms
             var roomDtos = ObjectMapper.Map<List<Room>, List<RoomDto>>(rooms);
 
             return new PagedResultDto<RoomDto>(totalCount, roomDtos);
+        }
+
+
+        protected override async Task<IQueryable<Room>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
+        {
+            var query = await Repository.GetQueryableAsync();
+            
+            return query.Where(r => r.IsActive);
         }
     }
 }

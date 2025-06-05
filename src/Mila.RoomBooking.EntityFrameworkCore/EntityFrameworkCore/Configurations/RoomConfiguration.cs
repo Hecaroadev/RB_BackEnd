@@ -16,7 +16,6 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
             builder.Property(x => x.Floor).IsRequired().HasMaxLength(50);
             builder.Property(x => x.Capacity).IsRequired();
             builder.Property(x => x.Description).HasMaxLength(500);
-            builder.Property(x => x.Type).IsRequired();
             builder.Property(x => x.Category).IsRequired().HasDefaultValue(RoomCategory.Regular);
             builder.Property(x => x.AvailableTools).IsRequired().HasDefaultValue(SoftwareTool.None);
             builder.Property(x => x.IsActive).IsRequired();

@@ -25,15 +25,14 @@ namespace UniversityBooking.Rooms.Dtos
         [StringLength(500)]
         public string Description { get; set; }
 
-        [Required]
-        public RoomType Type { get; set; }
-        
+
+
         /// <summary>
         /// The category of room for booking process
         /// </summary>
         [Required]
         public RoomCategory Category { get; set; } = RoomCategory.Regular;
-        
+
         /// <summary>
         /// Software tools available in this room (for labs)
         /// </summary>

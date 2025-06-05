@@ -90,8 +90,8 @@ namespace UniversityBooking.Data
                         "Engineering",
                         "Ground",
                         30,
-                        RoomType.Laboratory,
                         "Computer Lab for engineering students"
+
                     )
                 );
 
@@ -103,7 +103,6 @@ namespace UniversityBooking.Data
                         "First",
                         60,
 
-                        RoomType.Classroom,
                         "Classroom for engineering lectures"
                           ,
                         RoomCategory.Lab
@@ -117,7 +116,6 @@ namespace UniversityBooking.Data
                         "Science",
                         "Second",
                         40,
-                        RoomType.Laboratory,
                         "Physics Lab"
                     )
                 );
