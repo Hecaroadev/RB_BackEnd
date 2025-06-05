@@ -1,7 +1,9 @@
 // BookingRequestConfiguration.cs
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UniversityBooking.BookingRequests;
+using UniversityBooking.Rooms;
 
 namespace UniversityBooking.EntityFrameworkCore.Configurations
 {
@@ -11,21 +13,31 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
         {
             builder.ToTable("BookingRequests");
 
-            builder.Property(x => x.RoomId).IsRequired();
-            builder.Property(x => x.TimeSlotId).IsRequired();
-            builder.Property(x => x.DayId).IsRequired();
-            builder.Property(x => x.SemesterId).IsRequired();
+            builder.Property(x => x.RoomId).IsRequired(false);
             builder.Property(x => x.RequestedBy).IsRequired().HasMaxLength(256);
-            builder.Property(x => x.RequestedById).IsRequired();
+            builder.Property(x => x.RequestedById).IsRequired(false);
             builder.Property(x => x.RequestDate).IsRequired();
             builder.Property(x => x.Purpose).IsRequired().HasMaxLength(500);
             builder.Property(x => x.Status).IsRequired();
             builder.Property(x => x.RejectionReason).HasMaxLength(500).IsRequired(false);
+            builder.Property(x => x.BookingDate)
+              .HasColumnType("datetime2") // Use datetime2 for better precision and range
+              .IsRequired(true);
+            builder.Property(x => x.StartTime).IsRequired();
+            builder.Property(x => x.EndTime).IsRequired();
 
+            // New fields
+            builder.Property(x => x.Category).IsRequired().HasDefaultValue(RoomCategory.Regular);
+            builder.Property(x => x.InstructorName).HasMaxLength(100).HasDefaultValue(string.Empty);
+            builder.Property(x => x.Subject).HasMaxLength(100).HasDefaultValue(string.Empty);
+            builder.Property(x => x.NumberOfStudents).IsRequired().HasDefaultValue(0);
+            // StartTime and EndTime were already configured earlier
+            builder.Property(x => x.IsRecurring).IsRequired().HasDefaultValue(false);
+            builder.Property(x => x.RecurringWeeks).IsRequired().HasDefaultValue(0);
+            builder.Property(x => x.RequiredTools).IsRequired().HasDefaultValue(SoftwareTool.None);
             // Index for faster lookups
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.RequestedById);
-            builder.HasIndex(x => new { x.RoomId, x.TimeSlotId, x.DayId, x.SemesterId, x.Status });
 
             // Relationships
             builder
@@ -33,24 +45,14 @@ namespace UniversityBooking.EntityFrameworkCore.Configurations
                 .WithMany(r => r.BookingRequests)
                 .HasForeignKey(br => br.RoomId)
                 .OnDelete(DeleteBehavior.Restrict);
+            // Configure RoomId as optional (nullable)
+            builder.HasOne(b => b.Room)
+              .WithMany()
+              .HasForeignKey(b => b.RoomId)
+              .IsRequired(false); // This makes the relationship optional
 
-            builder
-                .HasOne(br => br.TimeSlot)
-                .WithMany()
-                .HasForeignKey(br => br.TimeSlotId)
-                .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(br => br.Day)
-                .WithMany()
-                .HasForeignKey(br => br.DayId)
-                .OnDelete(DeleteBehavior.Restrict);
 
-            builder
-                .HasOne(br => br.Semester)
-                .WithMany()
-                .HasForeignKey(br => br.SemesterId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder
                 .HasOne(br => br.RequestedByUser)

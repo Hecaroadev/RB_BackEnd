@@ -1,5 +1,8 @@
 using System;
-using System.Collections.Generic;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using Volo.Abp.Modularity;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -33,8 +36,11 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.Bundling;
 using Microsoft.AspNetCore.Hosting;
+using Mila.RoomBooking.Middleware;
 using UniversityBooking.Rooms;
 using Volo.Abp.AspNetCore.Serilog;
+using Volo.Abp.Authorization;
+using Volo.Abp.Authorization.Localization;
 using Volo.Abp.Identity;
 using Volo.Abp.OpenIddict;
 using Volo.Abp.Swashbuckle;
@@ -53,7 +59,8 @@ namespace Mila.RoomBooking;
     typeof(RoomBookingEntityFrameworkCoreModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(AbpAuthorizationModule)
     )]
 public class RoomBookingHttpApiHostModule : AbpModule
 {
@@ -113,8 +120,13 @@ public class RoomBookingHttpApiHostModule : AbpModule
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogCompleteSecurityArtifact = true;
         }
 
+        context.Services.AddAuthorization(options =>
+        {
+          options.AddPolicy("auth", policy => { policy.RequireAuthenticatedUser(); });
+        });
         if (!configuration.GetValue<bool>("AuthServer:RequireHttpsMetadata"))
         {
+
             Configure<OpenIddictServerAspNetCoreOptions>(options =>
             {
                 options.DisableTransportSecurityRequirement = true;
@@ -293,5 +305,7 @@ public class RoomBookingHttpApiHostModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
     }
 }

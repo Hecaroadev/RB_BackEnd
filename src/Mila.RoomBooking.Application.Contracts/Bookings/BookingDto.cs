@@ -3,7 +3,7 @@ using System;
 using UniversityBooking.Bookings;
 using UniversityBooking.Days.Dtos;
 using UniversityBooking.Rooms.Dtos;
-using UniversityBooking.Semesters.Dtos;
+// Removed: using UniversityBooking.Semesters.Dtos;
 using UniversityBooking.TimeSlots.Dtos;
 using Volo.Abp.Application.Dtos;
 
@@ -14,7 +14,7 @@ namespace UniversityBooking.Bookings.Dtos
         public Guid RoomId { get; set; }
         public Guid TimeSlotId { get; set; }
         public Guid DayId { get; set; }
-        public Guid SemesterId { get; set; }
+        // Removed: public Guid SemesterId { get; set; }
         public Guid? BookingRequestId { get; set; }
         public Guid ReservedById { get; set; }
         public string ReservedBy { get; set; }
@@ -29,6 +29,6 @@ namespace UniversityBooking.Bookings.Dtos
         public RoomDto Room { get; set; }
         public TimeSlotDto TimeSlot { get; set; }
         public DayDto Day { get; set; }
-        public SemesterDto Semester { get; set; }
+        // Removed: public SemesterDto Semester { get; set; }
     }
 }

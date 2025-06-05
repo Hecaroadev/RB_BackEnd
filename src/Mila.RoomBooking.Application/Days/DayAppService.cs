@@ -1,6 +1,7 @@
 // DayAppService.cs
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniversityBooking.Days.Dtos;
 using Volo.Abp.Application.Services;
@@ -20,7 +21,8 @@ namespace UniversityBooking.Days
         public async Task<List<DayDto>> GetListAsync()
         {
             var days = await _repository.GetListAsync();
-            return ObjectMapper.Map<List<Day>, List<DayDto>>(days);
+            var orderedDays = days.OrderBy(d => d.DayOfWeek).ToList();
+            return ObjectMapper.Map<List<Day>, List<DayDto>>(orderedDays);
         }
 
         public async Task<DayDto> GetAsync(Guid id)

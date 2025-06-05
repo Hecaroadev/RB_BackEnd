@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniversityBooking.Days;
-using UniversityBooking.Semesters;
 using Volo.Abp.Domain.Entities;
 
 namespace UniversityBooking.BookingBoard
@@ -22,7 +21,7 @@ namespace UniversityBooking.BookingBoard
             Days = new List<CalendarDayItem>();
         }
         
-        public WeeklyCalendar(DateTime referenceDate, IEnumerable<Day> workingDays, Semester currentSemester)
+        public WeeklyCalendar(DateTime referenceDate, IEnumerable<Day> workingDays)
         {
             // Calculate the start of the week (Sunday)
             var dayOfWeek = (int)referenceDate.DayOfWeek;
@@ -39,12 +38,13 @@ namespace UniversityBooking.BookingBoard
                 var date = WeekStartDate.AddDays(i);
                 var matchingDay = workingDays.FirstOrDefault(d => d.DayOfWeek == date.DayOfWeek);
                 
-                bool isInSemester = currentSemester?.IsDateInSemester(date) ?? false;
+                // All dates are considered valid now (no semester check)
+                bool isAvailable = true;
                 
                 Days.Add(new CalendarDayItem(
                     date,
                     matchingDay?.Id,
-                    isInSemester,
+                    isAvailable,
                     matchingDay != null
                 ));
             }
@@ -58,14 +58,14 @@ namespace UniversityBooking.BookingBoard
                 DayOfWeek.Monday);
         }
         
-        public WeeklyCalendar GetNextWeek(IEnumerable<Day> workingDays, Semester currentSemester)
+        public WeeklyCalendar GetNextWeek(IEnumerable<Day> workingDays)
         {
-            return new WeeklyCalendar(WeekEndDate.AddDays(1), workingDays, currentSemester);
+            return new WeeklyCalendar(WeekEndDate.AddDays(1), workingDays);
         }
         
-        public WeeklyCalendar GetPreviousWeek(IEnumerable<Day> workingDays, Semester currentSemester)
+        public WeeklyCalendar GetPreviousWeek(IEnumerable<Day> workingDays)
         {
-            return new WeeklyCalendar(WeekStartDate.AddDays(-1), workingDays, currentSemester);
+            return new WeeklyCalendar(WeekStartDate.AddDays(-1), workingDays);
         }
         
         public override object[] GetKeys()

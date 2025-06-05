@@ -8,6 +8,7 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <RootNamespace>Mila.RoomBooking</RootNamespace>
     <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Mila.RoomBooking.HttpApi.Host' " />

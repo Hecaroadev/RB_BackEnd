@@ -27,7 +27,18 @@ namespace UniversityBooking.Rooms.Dtos
 
         [Required]
         public RoomType Type { get; set; }
+        
+        /// <summary>
+        /// The category of room for booking process
+        /// </summary>
+        [Required]
+        public RoomCategory Category { get; set; } = RoomCategory.Regular;
+        
+        /// <summary>
+        /// Software tools available in this room (for labs)
+        /// </summary>
+        public SoftwareTool AvailableTools { get; set; } = SoftwareTool.None;
 
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

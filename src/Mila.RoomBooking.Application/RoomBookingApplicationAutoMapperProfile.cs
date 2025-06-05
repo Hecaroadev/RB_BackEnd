@@ -9,8 +9,6 @@ using UniversityBooking.Days;
 using UniversityBooking.Days.Dtos;
 using UniversityBooking.Rooms;
 using UniversityBooking.Rooms.Dtos;
-using UniversityBooking.Semesters;
-using UniversityBooking.Semesters.Dtos;
 using UniversityBooking.TimeSlots;
 using UniversityBooking.TimeSlots.Dtos;
 
@@ -26,53 +24,34 @@ public class RoomBookingApplicationAutoMapperProfile : Profile
         // Room
         CreateMap<Room, RoomDto>();
         CreateMap<CreateUpdateRoomDto, Room>();
-            
+
         // TimeSlot
         CreateMap<TimeSlot, TimeSlotDto>();
         CreateMap<CreateUpdateTimeSlotDto, TimeSlot>();
-            
+
         // Day
         CreateMap<Day, DayDto>();
-            
-        // Semester
-        CreateMap<Semester, SemesterDto>();
-        CreateMap<CreateUpdateSemesterDto, Semester>();
-            
+
         // BookingRequest
         CreateMap<BookingRequest, BookingRequestDto>()
-            .ForMember(
-                dest => dest.Room,
-                opt => opt.MapFrom(src => src.Room))
-            .ForMember(
-                dest => dest.TimeSlot,
-                opt => opt.MapFrom(src => src.TimeSlot))
-            .ForMember(
-                dest => dest.Day,
-                opt => opt.MapFrom(src => src.Day))
-            .ForMember(
-                dest => dest.Semester,
-                opt => opt.MapFrom(src => src.Semester));
-            
-        // Booking
+          .ForMember(
+            dest => dest.Room,
+            opt => opt.MapFrom(src => src.Room))
+          ;
         CreateMap<Booking, BookingDto>()
-            .ForMember(
-                dest => dest.Room,
-                opt => opt.MapFrom(src => src.Room))
-            .ForMember(
-                dest => dest.TimeSlot,
-                opt => opt.MapFrom(src => src.TimeSlot))
-            .ForMember(
-                dest => dest.Day,
-                opt => opt.MapFrom(src => src.Day))
-            .ForMember(
-                dest => dest.Semester,
-                opt => opt.MapFrom(src => src.Semester));
-                
+          .ForMember(
+            dest => dest.Room,
+            opt => opt.MapFrom(src => src.Room))
+          ;
         // BookingBoard mappings
         CreateMap<WeeklyCalendar, WeeklyCalendarDto>();
         CreateMap<CalendarDayItem, CalendarDayItemDto>()
             .ForMember(
                 dest => dest.FormattedDate,
                 opt => opt.MapFrom(src => src.Date.ToString("MMM dd")));
+
+        // AvailabilityAnnouncement mapping
+        CreateMap<AvailabilityAnnouncement, AvailabilityAnnouncementDto>();
+        CreateMap<CreateUpdateAvailabilityAnnouncementDto, AvailabilityAnnouncement>();
     }
 }
