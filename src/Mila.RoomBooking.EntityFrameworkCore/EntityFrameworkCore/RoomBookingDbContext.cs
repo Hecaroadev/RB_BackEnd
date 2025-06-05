@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mila.RoomBooking.SchaduledBookings;
 using UniversityBooking.BookingRequests;
 using UniversityBooking.Bookings;
 using UniversityBooking.Days;
@@ -33,10 +34,11 @@ public class RoomBookingDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Room> Rooms { get; set; }
-   public DbSet<TimeSlot> TimeSlots { get; set; }
-   public DbSet<Day> Days { get; set; }
+    public DbSet<TimeSlot> TimeSlots { get; set; }
+    public DbSet<Day> Days { get; set; }
     public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<SchaduledBooking> SchaduledBookings { get; set; }
     public DbSet<UniversityBooking.Rooms.AvailabilityAnnouncement> AvailabilityAnnouncements { get; set; }
 
     #region Entities from the modules
@@ -97,6 +99,7 @@ public class RoomBookingDbContext :
         builder.ApplyConfiguration(new BookingRequestConfiguration());
         builder.ApplyConfiguration(new BookingConfiguration());
         builder.ApplyConfiguration(new AvailabilityAnnouncementConfiguration());
+        builder.ApplyConfiguration(new SchaduledBookingConfiguration());
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>

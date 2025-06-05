@@ -24,6 +24,79 @@ namespace Mila.RoomBooking.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Mila.RoomBooking.SchaduledBookings.SchaduledBooking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid>("DayId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Purpose")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ReservedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DayId");
+
+                    b.HasIndex("ReservedByUserId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("SchaduledBookings");
+                });
+
             modelBuilder.Entity("UniversityBooking.BookingRequests.BookingRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -548,12 +621,17 @@ namespace Mila.RoomBooking.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("SchaduledBookingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("SchaduledBookingId");
 
                     b.HasIndex("StartTime", "EndTime");
 
@@ -2385,6 +2463,31 @@ namespace Mila.RoomBooking.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
+            modelBuilder.Entity("Mila.RoomBooking.SchaduledBookings.SchaduledBooking", b =>
+                {
+                    b.HasOne("UniversityBooking.Days.Day", "Day")
+                        .WithMany()
+                        .HasForeignKey("DayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", "ReservedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReservedByUserId");
+
+                    b.HasOne("UniversityBooking.Rooms.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Day");
+
+                    b.Navigation("ReservedByUser");
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("UniversityBooking.BookingRequests.BookingRequest", b =>
                 {
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "ProcessedByUser")
@@ -2439,6 +2542,13 @@ namespace Mila.RoomBooking.Migrations
                     b.Navigation("ReservedByUser");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("UniversityBooking.TimeSlots.TimeSlot", b =>
+                {
+                    b.HasOne("Mila.RoomBooking.SchaduledBookings.SchaduledBooking", null)
+                        .WithMany("TimeRange")
+                        .HasForeignKey("SchaduledBookingId");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
@@ -2590,6 +2700,11 @@ namespace Mila.RoomBooking.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Mila.RoomBooking.SchaduledBookings.SchaduledBooking", b =>
+                {
+                    b.Navigation("TimeRange");
                 });
 
             modelBuilder.Entity("UniversityBooking.Days.Day", b =>

@@ -11,7 +11,7 @@ namespace UniversityBooking.Bookings
 {
     public class Booking : FullAuditedAggregateRoot<Guid>
     {
-        public Guid RoomId { get; private set; }
+        public Guid RoomId { get; set; }
 
         public Guid? BookingRequestId { get; private set; }
         public Guid? ReservedById { get; private set; }
