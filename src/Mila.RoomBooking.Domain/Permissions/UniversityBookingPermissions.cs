@@ -16,7 +16,7 @@ namespace UniversityBooking.Permissions
       public const string Review = Default + ".Review"; // Review all pending requests
       public const string Approve = Default + ".Approve"; // Approve a booking request
       public const string Reject = Default + ".Reject"; // Reject a booking request
-      
+
       // Role-based approvals
       public const string ApproveClassrooms = Default + ".ApproveClassrooms";
       public const string ApproveLabs = Default + ".ApproveLabs";
@@ -31,7 +31,7 @@ namespace UniversityBooking.Permissions
       public const string Delete = Default + ".Delete";
       public const string ManageSettings = Default + ".ManageSettings";
     }
-    
+
     public static class Booking
     {
       public const string Default = GroupName + ".Booking";
@@ -41,7 +41,7 @@ namespace UniversityBooking.Permissions
       public const string CancelOwn = Default + ".CancelOwn"; // Cancel own booking
       public const string CreateRecurring = Default + ".CreateRecurring"; // Create recurring bookings
     }
-    
+
     public static class Reports
     {
       public const string Default = GroupName + ".Report";
@@ -49,7 +49,14 @@ namespace UniversityBooking.Permissions
       public const string ExportReports = Default + ".ExportReports";
       public const string ViewAnalytics = Default + ".ViewAnalytics";
     }
-    
+    public static class SchaduledBookings
+    {
+      public const string Default = GroupName + ".SchaduledBookings";
+      public const string Create = Default + ".Create";
+      public const string Edit = Default + ".Edit";
+      public const string Delete = Default + ".Delete";
+      public const string ManageAll = Default + ".ManageAll";
+    }
     public static string[] GetAll()
     {
       return ReflectionHelper.GetPublicConstantsRecursively(typeof(UniversityBookingPermissions));

@@ -20,95 +20,96 @@ namespace UniversityBooking.Permissions
 
       // Booking Request permissions
       var bookingRequestPermission = bookingGroup.AddPermission(
-        UniversityBookingPermissions.BookingRequest.Default, 
+        UniversityBookingPermissions.BookingRequest.Default,
         L("Permission:BookingRequests")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Create, 
+        UniversityBookingPermissions.BookingRequest.Create,
         L("Permission:BookingRequests.Create")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.View, 
+        UniversityBookingPermissions.BookingRequest.View,
         L("Permission:BookingRequests.View")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Manage, 
+        UniversityBookingPermissions.BookingRequest.Manage,
         L("Permission:BookingRequests.Manage")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Cancel, 
+        UniversityBookingPermissions.BookingRequest.Cancel,
         L("Permission:BookingRequests.Cancel")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Review, 
+        UniversityBookingPermissions.BookingRequest.Review,
         L("Permission:BookingRequests.Review")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Approve, 
+        UniversityBookingPermissions.BookingRequest.Approve,
         L("Permission:BookingRequests.Approve")
       );
       bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.Reject, 
+        UniversityBookingPermissions.BookingRequest.Reject,
         L("Permission:BookingRequests.Reject")
       );
-      
+
       // Role-specific approval permissions
       var approveClassroomsPermission = bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.ApproveClassrooms, 
+        UniversityBookingPermissions.BookingRequest.ApproveClassrooms,
         L("Permission:BookingRequests.ApproveClassrooms")
       );
       var approveLabsPermission = bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.ApproveLabs, 
+        UniversityBookingPermissions.BookingRequest.ApproveLabs,
         L("Permission:BookingRequests.ApproveLabs")
       );
       var approveConferenceRoomsPermission = bookingRequestPermission.AddChild(
-        UniversityBookingPermissions.BookingRequest.ApproveConferenceRooms, 
+        UniversityBookingPermissions.BookingRequest.ApproveConferenceRooms,
         L("Permission:BookingRequests.ApproveConferenceRooms")
       );
-      
+
       // Booking permissions
       var bookingPermission = bookingGroup.AddPermission(
-        UniversityBookingPermissions.Booking.Default, 
+        UniversityBookingPermissions.Booking.Default,
         L("Permission:Bookings")
       );
       bookingPermission.AddChild(
-        UniversityBookingPermissions.Booking.View, 
+        UniversityBookingPermissions.Booking.View,
         L("Permission:Bookings.View")
       );
       bookingPermission.AddChild(
-        UniversityBookingPermissions.Booking.Create, 
+        UniversityBookingPermissions.Booking.Create,
         L("Permission:Bookings.Create")
       );
       bookingPermission.AddChild(
-        UniversityBookingPermissions.Booking.Cancel, 
+        UniversityBookingPermissions.Booking.Cancel,
         L("Permission:Bookings.Cancel")
       );
       bookingPermission.AddChild(
-        UniversityBookingPermissions.Booking.CancelOwn, 
+        UniversityBookingPermissions.Booking.CancelOwn,
         L("Permission:Bookings.CancelOwn")
       );
       bookingPermission.AddChild(
-        UniversityBookingPermissions.Booking.CreateRecurring, 
+        UniversityBookingPermissions.Booking.CreateRecurring,
         L("Permission:Bookings.CreateRecurring")
       );
-      
+
       // Reports permissions
       var reportsPermission = bookingGroup.AddPermission(
-        UniversityBookingPermissions.Reports.Default, 
+        UniversityBookingPermissions.Reports.Default,
         L("Permission:Reports")
       );
       reportsPermission.AddChild(
-        UniversityBookingPermissions.Reports.ViewUsageReports, 
+        UniversityBookingPermissions.Reports.ViewUsageReports,
         L("Permission:Reports.ViewUsageReports")
       );
       reportsPermission.AddChild(
-        UniversityBookingPermissions.Reports.ExportReports, 
+        UniversityBookingPermissions.Reports.ExportReports,
         L("Permission:Reports.ExportReports")
       );
       reportsPermission.AddChild(
-        UniversityBookingPermissions.Reports.ViewAnalytics, 
+        UniversityBookingPermissions.Reports.ViewAnalytics,
         L("Permission:Reports.ViewAnalytics")
       );
+
     }
 
     private static LocalizableString L(string name)

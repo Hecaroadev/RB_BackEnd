@@ -10,4 +10,6 @@ public class TimeSlotStateDto
   public int Order { get; set; }
   public bool IsBooked { get; set; }
   public Guid? ScheduledBookingId { get; set; } // SB_id if booked
+  public string? InstructorName { get; set; }
+  public string? Subject { get; set; }
 }

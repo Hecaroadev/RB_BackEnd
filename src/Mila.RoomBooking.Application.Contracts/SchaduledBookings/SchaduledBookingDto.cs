@@ -14,6 +14,8 @@ public class SchaduledBookingDto : EntityDto<Guid>
   public Guid RoomId { get; set; }
   public Guid DayId { get; set; }
   public string? Purpose { get; set; }
+  public string? InstructorName { get; set; }
+  public string? Subject { get; set; }
   public BookingStatus Status { get; set; }
   public List<TimeSlot> TimeRange { get; set; }
   public virtual Room Room { get; set; }

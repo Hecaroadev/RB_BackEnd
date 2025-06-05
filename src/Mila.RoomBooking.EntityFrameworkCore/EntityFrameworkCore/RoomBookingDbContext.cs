@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mila.RoomBooking.EntityFrameworkCore.Configurations;
 using Mila.RoomBooking.SchaduledBookings;
 using UniversityBooking.BookingRequests;
 using UniversityBooking.Bookings;

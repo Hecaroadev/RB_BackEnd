@@ -84,6 +84,7 @@ namespace UniversityBooking.Bookings
     {
         Active,
         Cancelled,
+        Confirmed,
         Completed
     }
 }
